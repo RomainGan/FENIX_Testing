@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport"/>
+<title>Fenix Toulouse — Testing Physique</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Barlow:wght@300;400;500;600;700&amp;family=Barlow+Condensed:wght@400;600;700&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<link href="./assets/css/base.css" rel="stylesheet"/>
+<link href="./assets/css/components.css" rel="stylesheet"/>
+<link href="./assets/css/reports.css" rel="stylesheet"/>
+<link href="./assets/css/forms-bodychart.css" rel="stylesheet"/></head>
+<body>
+<div class="shell">
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+<div class="sidebar-logo">
+<img alt="Fenix Toulouse" class="logo-img" src="assets/img/datauri_1.png"/>
+<div class="logo-text">
+<div class="logo-club">FENIX</div>
+<div class="logo-sub">Toulouse Handball</div>
+<div class="logo-badge">Testing Physique</div>
+</div>
+</div>
+<div class="sidebar-nav">
+<div class="nav-label">Navigation</div>
+<button class="nav-btn active" onclick="showView('testing')"><span class="icon">📋</span> Fiche Testing</button>
+<button class="nav-btn" onclick="showView('rapport')"><span class="icon">📑</span> Rapport Athlète</button>
+<button class="nav-btn" onclick="showView('comp')"><span class="icon">📈</span> Comparaison</button>
+<button class="nav-btn" onclick="showView('recap')"><span class="icon">📊</span> Récapitulatif Équipe</button>
+<div class="nav-label" style="margin-top:12px">Effectif</div>
+<div id="playerList"></div>
+<button class="add-player-btn" onclick="openModal()">＋ Ajouter un joueur</button>
+<button class="add-player-btn" onclick="recoverData()" style="border-color:var(--gold);color:var(--gold);font-size:11px;padding:7px 12px" title="Récupérer les données des versions précédentes">
+        🔄 Récupérer données
+      </button>
+<div class="nav-label" style="margin-top:12px">Import / Export</div>
+<button class="add-player-btn" onclick="importJSON()" style="border-color:var(--cyan);color:var(--cyan);font-size:11px;padding:7px 12px" title="Importer un fichier JSON exporté par l'application">
+  📥 Importer JSON
+</button>
+<button class="add-player-btn" onclick="importPDF()" style="border-color:#a78bfa;color:#a78bfa;font-size:11px;padding:7px 12px" title="Importer une fiche bilan PDF — extraction automatique par IA">
+  ✦ Importer PDF (IA)
+</button>
+</div>
+</nav>
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+<button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')">☰</button>
+<div class="topbar-player">
+<div class="topbar-avatar" id="topbarAvatar">FT</div>
+<div class="topbar-info">
+<div class="topbar-name" id="topbarTitle">TESTING PHYSIQUE</div>
+<div class="topbar-meta" id="topbarMeta">Sélectionnez un joueur</div>
+</div>
+</div>
+<span class="meta-chip c-cyan" id="dateChip">—</span>
+<span class="meta-chip">Saison 2024-25</span>
+<button class="btn btn-cyan" id="saveBtn" onclick="saveData()" title="Sauvegarder toutes les données en fichier JSON (backup)">💾 Sauvegarder</button>
+<button class="btn btn-outline" id="themeToggleBtn" onclick="toggleTheme()" title="Basculer thème clair / sombre" style="font-size:16px;padding:6px 10px;min-width:36px">🌙</button>
+<button class="btn btn-outline" id="resetBtn" onclick="confirmReset(this)" style="color:var(--red);border-color:var(--red-border);font-size:11px;padding:6px 10px" title="Vider toutes les données">🗑 Reset</button>
+</div>
+<div class="content" id="mainContent">
+<div class="empty-state">
+<div class="empty-icon">🤾</div>
+<div class="empty-title">Aucun joueur sélectionné</div>
+<div class="empty-desc">Sélectionnez un joueur dans la barre latérale<br/>ou ajoutez un nouveau joueur pour commencer.</div>
+<br/>
+<button class="btn btn-cyan" onclick="openModal()" style="margin:auto">＋ Ajouter un joueur</button>
+</div>
+</div>
+</div>
+</div>
+<!-- HIDDEN PHOTO INPUT -->
+<input accept="image/*" id="photoInput" onchange="handlePhotoUpload(event)" style="display:none" type="file"/>
+<!-- EXPORT MODAL -->
+<div class="export-modal-overlay" id="exportModal">
+<div class="export-modal">
+<div class="export-modal-title">📤 Exporter la Fiche</div>
+<div class="export-modal-sub" id="exportModalSub">Choisissez le format d'export</div>
+<div class="export-player-card" id="exportPlayerCard">
+<div class="player-avatar" id="exportAvatar">FT</div>
+<div>
+<div class="export-player-name" id="exportPlayerName">—</div>
+<div class="export-player-meta" id="exportPlayerMeta">—</div>
+</div>
+</div>
+<div class="export-score-row" id="exportScoreRow">
+<div class="export-score-chip"><div class="chip-val" id="eScoreGlobal">—</div><div class="chip-lbl">Score Global</div></div>
+<div class="export-score-chip"><div class="chip-val" id="eScoreTests">—</div><div class="chip-lbl">Tests Renseignés</div></div>
+<div class="export-score-chip"><div class="chip-val" id="eScoreS3" style="color:var(--green)">—</div><div class="chip-lbl">Scores ●3</div></div>
+</div>
+<div class="export-btn-group">
+<button class="export-action-btn" onclick="exportPDF()">
+<span class="eab-icon">📄</span>
+<div class="eab-text">
+<div class="eab-title">Télécharger en PDF</div>
+<div class="eab-desc">Capture haute qualité de la fiche complète</div>
+</div>
+</button>
+<button class="export-action-btn btn-email" onclick="exportEmail('mailto')">
+<span class="eab-icon">📧</span>
+<div class="eab-text">
+<div class="eab-title">Envoyer par Email</div>
+<div class="eab-desc">Affiche le contenu à copier-coller dans votre client mail</div>
+</div>
+</button>
+<button class="export-action-btn btn-email" onclick="exportEmail('gmail')">
+<span class="eab-icon">✉️</span>
+<div class="eab-text">
+<div class="eab-title">Ouvrir dans Gmail</div>
+<div class="eab-desc">Compose le rapport dans Gmail (navigateur)</div>
+</div>
+</button>
+</div>
+<button class="export-cancel" onclick="closeExportModal()">✕ Fermer</button>
+</div>
+</div>
+<!-- PDF PROGRESS -->
+<div class="pdf-progress" id="pdfProgress">
+<div class="pdf-progress-title">⚙ Génération PDF</div>
+<div class="pdf-progress-bar-wrap"><div class="pdf-progress-bar-fill" id="pdfProgressBar" style="width:0%"></div></div>
+<div class="pdf-progress-label" id="pdfProgressLabel">Initialisation…</div>
+</div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+<div class="modal">
+<div class="modal-title">Nouveau Joueur</div>
+<div class="modal-fields">
+<div class="modal-row">
+<div class="field-group"><div class="field-label">Prénom *</div><input class="field-input" id="mPrenom" placeholder="Thomas" type="text"/></div>
+<div class="field-group"><div class="field-label">Nom *</div><input class="field-input" id="mNom" placeholder="Martin" type="text"/></div>
+</div>
+<div class="modal-row">
+<div class="field-group"><div class="field-label">Groupe / Équipe</div><input class="field-input" id="mGroupe" placeholder="PRO A — Gardien" type="text"/></div>
+<div class="field-group"><div class="field-label">Poste</div><input class="field-input" id="mPoste" placeholder="Pivot" type="text"/></div>
+</div>
+<div class="modal-row">
+<div class="field-group"><div class="field-label">Date de naissance</div><input class="field-input" id="mDdn" type="date"/></div>
+<div class="field-group"><div class="field-label">Date du test</div><input class="field-input" id="mDate" type="date"/></div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:4px 2px">
+<input id="mEssai" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer" type="checkbox"/>
+<label for="mEssai" style="font-family:'Barlow',sans-serif;font-size:13px;color:var(--text-2);cursor:pointer">
+          Joueur en <strong style="color:var(--gold)">période d'essai</strong> <span style="color:var(--text-3);font-size:11px">(avatar grisé)</span>
+</label>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+<button class="btn btn-cyan" onclick="addPlayer()">Créer le profil</button>
+</div>
+</div>
+</div>
+
+<!-- ── core : données + état + utilitaires ── -->
+<script src="./assets/js/core/data-tests.js"></script>
+<script src="./assets/js/core/state.js"></script>
+<script src="./assets/js/core/utils.js"></script>
+<!-- ── ui : composants d'interface ── -->
+<script src="./assets/js/ui/bodychart.js"></script>
+<script src="./assets/js/ui/form-render.js"></script>
+<script src="./assets/js/ui/form-actions.js"></script>
+<script src="./assets/js/ui/players.js"></script>
+<!-- ── views : vues principales ── -->
+<script src="./assets/js/views/analysis.js"></script>
+<script src="./assets/js/views/report.js"></script>
+<script src="./assets/js/views/comparison.js"></script>
+<!-- ── app : export + initialisation ── -->
+<script src="./assets/js/app/export.js"></script>
+<script src="./assets/js/app/init.js"></script></body>
+</html>
