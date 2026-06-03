@@ -35,15 +35,15 @@ const TESTS=[
        {s:2,t:'Alignement entre l\'axe du fémur et l\'horizontale'},
        {s:3,t:'Angle supérieur à la norme'}
      ]},
-    {id:'t5',num:5,name:'Grand Écart contre un mur',desc:'Mobilité adducteurs et hanche',bilateral:false,
+    {id:'t5',num:5,name:'Grand Écart contre un mur',desc:'Mobilité adducteurs et hanche — angle total entre les deux jambes',bilateral:false,
      type:'numeric',unit:'°',
-     thr:[{s:0,l:'Douleur'},{s:1,l:'< 45° / jambe'},{s:2,l:'45°–60° / jambe'},{s:3,l:'> 60° / jambe'}],
-     auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<0)return 0;if(n<45)return 1;if(n<=60)return 2;return 3;},
+     thr:[{s:0,l:'Douleur'},{s:1,l:'< 90°'},{s:2,l:'90°–120°'},{s:3,l:'> 120°'}],
+     auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<0)return 0;if(n<90)return 1;if(n<=120)return 2;return 3;},
      crit:[
        {s:0,t:'Douleurs lors de l\'exécution. Impossible à réaliser en respectant les consignes (jambes tendues, genoux en extension, cheville en dorsiflexion)'},
-       {s:1,t:'Réalise l\'exercice avec très peu d\'amplitude — inférieur à 45° par jambe (= 90° d\'ouverture)'},
-       {s:2,t:'Amplitude moyenne comprise entre 45° et 60° par jambe (= 120° d\'ouverture de hanche)'},
-       {s:3,t:'Angle supérieur à la norme'}
+       {s:1,t:'Très peu d\'amplitude — angle total inférieur à 90° (< 45° par jambe)'},
+       {s:2,t:'Amplitude moyenne — angle total entre 90° et 120° (45°–60° par jambe)'},
+       {s:3,t:'Bonne amplitude — angle total supérieur à 120° (> 60° par jambe)'}
      ]},
     {id:'t6',num:6,name:'Sit & Reach',desc:'Flexion tronc — chaîne postérieure',bilateral:false,
      type:'numeric',unit:'cm',
