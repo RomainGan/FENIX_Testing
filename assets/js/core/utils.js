@@ -40,7 +40,12 @@ function ghostSVG(sz){
 function renderList(){
   const el = document.getElementById('playerList');
   if(!players.length){ el.innerHTML='<div style="padding:8px 12px;font-size:12px;color:var(--text-3)">Aucun joueur</div>'; return; }
-  el.innerHTML = players.map(p=>{
+  const sorted = [...players].sort((a,b)=>{
+    const na=(a.n||'').toLowerCase(), nb=(b.n||'').toLowerCase();
+    if(na!==nb) return na.localeCompare(nb,'fr');
+    return (a.pr||'').toLowerCase().localeCompare((b.pr||'').toLowerCase(),'fr');
+  });
+  el.innerHTML = sorted.map(p=>{
     const latestSidx = p.sessions ? p.sessions.length-1 : null;
     const s = calcScore(p.id, latestSidx);
     const cls = s.t>=70?'pill-green':s.t>=40?'pill-orange':'pill-red';
