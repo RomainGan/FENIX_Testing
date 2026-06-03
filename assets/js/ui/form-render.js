@@ -104,9 +104,9 @@ function renderForm(_p){
           <div class="fiche-label">Date de naissance</div>
           <input class="fiche-input" type="date" value="${_p.ddn||''}" onchange="uf('ddn',this.value)">
         </div>
-        <div class="fiche-field">
+        <div class="fiche-field" style="max-width:90px;min-width:70px;flex:0 0 80px">
           <div class="fiche-label">Âge</div>
-          <div class="fiche-input" style="display:flex;align-items:center;color:var(--cyan);font-weight:700;letter-spacing:1px">${ageCalc!==null?ageCalc+' ans':'—'}</div>
+          <div class="fiche-input" style="display:flex;align-items:center;justify-content:center;color:var(--cyan);font-weight:700;letter-spacing:1px;text-align:center">${ageCalc!==null?ageCalc+' ans':'—'}</div>
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Groupe</div>
