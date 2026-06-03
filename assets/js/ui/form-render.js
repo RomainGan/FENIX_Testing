@@ -425,7 +425,7 @@ function renderForm(_p){
         let html='';
         if(t.thr){
           html+=`<div class="raw-unit">${t.unit}</div>`;
-          html+=`<input type="text" inputmode="decimal" class="raw-input" value="${rawVal}" placeholder="${t.unit}" onchange="uRaw('${scoreKey}','${rawKey}',this.value,'${t.id}')">`;
+          html+=`<input type="text" inputmode="decimal" class="raw-input" value="${rawVal}" placeholder="${t.unit}" oninput="uRaw('${scoreKey}','${rawKey}',this.value,'${t.id}')">`;
         }
         html+=scoreBtns(scoreKey,curVal);
         if(t.thr){
