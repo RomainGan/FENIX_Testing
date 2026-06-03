@@ -30,7 +30,7 @@ function uScore(key,val,tid,isNote=false){
   if(!isNote){
     updateScoreSummary();
     renderList();
-    document.querySelectorAll(`button.sb[onclick*="'${key}'"]`).forEach(btn=>{
+    document.querySelectorAll(`button.sb[data-key="${key}"]`).forEach(btn=>{
       btn.classList.remove('sel');
       if(btn.textContent==String(val)) btn.classList.add('sel');
     });
@@ -49,7 +49,7 @@ function uRaw(scoreKey,rawKey,rawVal,tid){
     const autoS=test.auto(rawVal, sess);
     if(autoS!==null){
       sess.d[scoreKey]=autoS;
-      document.querySelectorAll(`button.sb[onclick*="'${scoreKey}'"]`).forEach(btn=>{
+      document.querySelectorAll(`button.sb[data-key="${scoreKey}"]`).forEach(btn=>{
         btn.classList.remove('sel');
         if(parseInt(btn.textContent)===autoS) btn.classList.add('sel');
       });

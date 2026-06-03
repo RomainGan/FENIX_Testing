@@ -423,7 +423,7 @@ function renderForm(_p){
       const nt=p.d[t.id+'_nt']||'';
       const scoreBtns=(key,curVal)=>{
         const cur = curVal!==null&&curVal!==undefined&&curVal!=='' ? parseInt(curVal) : null;
-        return `<div class="score-btns">${[0,1,2,3].map(s=>`<button class="sb sb-${s}${cur===s?' sel':''}" onclick="uScore('${key}',${s},'${t.id}')">${s}</button>`).join('')}</div>`;
+        return `<div class="score-btns">${[0,1,2,3].map(s=>`<button class="sb sb-${s}${cur===s?' sel':''}" data-key="${key}" onclick="uScore('${key}',${s},'${t.id}')">${s}</button>`).join('')}</div>`;
       };
       const numCell=(scoreKey,rawKey,curVal,rawVal)=>{
         let html='';
