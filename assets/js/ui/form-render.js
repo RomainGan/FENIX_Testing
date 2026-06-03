@@ -160,15 +160,19 @@ function renderForm(_p){
     </div>
     <div class="fiche-section-body" id="fsb_anthro">
 
-      <!-- Taille / Poids -->
+      <!-- Taille / Poids / Longueur main dominante -->
       <div class="fiche-grid" style="margin-bottom:16px">
         <div class="fiche-field">
           <div class="fiche-label">Taille (cm)</div>
-          <input class="fiche-input" type="number" value="${p.ta||''}" placeholder="184" onchange="uf('ta',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.ta||''}" placeholder="184" oninput="uf('ta',this.value)">
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Poids (kg)</div>
-          <input class="fiche-input" type="number" step="0.1" value="${p.po||''}" placeholder="82.5" onchange="uf('po',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.po||''}" placeholder="82.5" oninput="uf('po',this.value)">
+        </div>
+        <div class="fiche-field">
+          <div class="fiche-label">Longueur main dominante (cm)</div>
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.lgMainDom||''}" placeholder="19.5" oninput="uf('lgMainDom',this.value)">
         </div>
       </div>
 
@@ -196,9 +200,9 @@ function renderForm(_p){
         const gridHtml = plis.map((k,i)=>`
           <div class="pli-field">
             <div class="pli-label">${'①②③④⑤⑥⑦'[i]} ${labels[i]}</div>
-            <input class="pli-input" type="number" step="0.1" value="${p[k]||''}"
+            <input class="pli-input" type="text" inputmode="decimal" value="${p[k]||''}"
               placeholder="—" data-key="${k}"
-              onchange="uf('${k}',this.value);refreshJP7()">
+              oninput="uf('${k}',this.value);refreshJP7()">
             <div class="pli-unit">mm</div>
           </div>`).join('');
 
@@ -230,19 +234,19 @@ function renderForm(_p){
       <div class="tour-grid">
         <div class="fiche-field">
           <div class="fiche-label">Tour de Cuisse (cm)</div>
-          <input class="fiche-input" type="number" step="0.5" value="${p.tourCuisse||''}" placeholder="—" onchange="uf('tourCuisse',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.tourCuisse||''}" placeholder="—" oninput="uf('tourCuisse',this.value)">
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Tour de Bras (cm)</div>
-          <input class="fiche-input" type="number" step="0.5" value="${p.tourBras||''}" placeholder="—" onchange="uf('tourBras',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.tourBras||''}" placeholder="—" oninput="uf('tourBras',this.value)">
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Tour de Taille (cm)</div>
-          <input class="fiche-input" type="number" step="0.5" value="${p.tourTaille||''}" placeholder="—" onchange="uf('tourTaille',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.tourTaille||''}" placeholder="—" oninput="uf('tourTaille',this.value)">
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Tour de Buste (cm)</div>
-          <input class="fiche-input" type="number" step="0.5" value="${p.tourBuste||''}" placeholder="—" onchange="uf('tourBuste',this.value)">
+          <input class="fiche-input" type="text" inputmode="decimal" value="${p.tourBuste||''}" placeholder="—" oninput="uf('tourBuste',this.value)">
         </div>
       </div>
     </div>
