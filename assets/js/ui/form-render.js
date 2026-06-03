@@ -253,7 +253,7 @@ function renderForm(_p){
       <div class="fiche-grid" style="margin-bottom:0">
         <div class="fiche-field">
           <div class="fiche-label">Longueur main dominante (cm) <span style="font-size:10px;color:var(--text-3)">— Réf. Shoulder FMS</span></div>
-          <input class="fiche-input" type="number" step="0.1" value="${p.lgMainDom||''}" placeholder="Ex: 19.5" onchange="uf('lgMainDom',this.value)">
+          <input class="fiche-input" type="number" step="0.1" value="${p.lgMainDom||''}" placeholder="Ex: 19.5" oninput="uf('lgMainDom',this.value)">
         </div>
       </div>
     </div>
