@@ -46,7 +46,7 @@ function uRaw(scoreKey,rawKey,rawVal,tid){
   sess.d[rawKey]=rawVal;
   let test=null; TESTS.forEach(s=>s.tests.forEach(t=>{if(t.id===tid)test=t;}));
   if(test&&test.auto){
-    const autoS=test.auto(rawVal);
+    const autoS=test.auto(rawVal, sess);
     if(autoS!==null){
       sess.d[scoreKey]=autoS;
       document.querySelectorAll(`button.sb[onclick*="'${scoreKey}'"]`).forEach(btn=>{
@@ -90,6 +90,7 @@ const SESSION_FIELDS=new Set(['dt','ta','po',
   'formulePlis','mgPct',
   'tourCuisse','tourBras','tourTaille','tourBuste',
   'pliBiceps','pliTriceps','pliSousScap','pliSupraIli',
+  'lgMainDom',
   'gn','aiPrevention']);
 function uf(f,v){
   if(!cPid) return;

@@ -245,6 +245,17 @@ function renderForm(_p){
           <input class="fiche-input" type="number" step="0.5" value="${p.tourBuste||''}" placeholder="—" onchange="uf('tourBuste',this.value)">
         </div>
       </div>
+
+      <!-- Longueur main dominante -->
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--text-3);margin:16px 0 8px">
+        MESURE MAIN DOMINANTE
+      </div>
+      <div class="fiche-grid" style="margin-bottom:0">
+        <div class="fiche-field">
+          <div class="fiche-label">Longueur main dominante (cm) <span style="font-size:10px;color:var(--text-3)">— Réf. Shoulder FMS</span></div>
+          <input class="fiche-input" type="number" step="0.1" value="${p.lgMainDom||''}" placeholder="Ex: 19.5" onchange="uf('lgMainDom',this.value)">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -262,22 +273,20 @@ function renderForm(_p){
           (_p.injuries||[]).map((inj,idx)=>{
             const d=inj.date?new Date(inj.date).toLocaleDateString('fr-FR',{month:'long',year:'numeric'}):'—';
             const resolved = inj.perturbeEncore===false||inj.perturbeEncore==='false';
-            const coteLabel = inj.cote==='G'?'Gauche':inj.cote==='D'?'Droite':inj.cote==='B'?'Bilatéral':'';
-            const titre = [inj.type, inj.localisation, coteLabel].filter(Boolean).join(' · ') || inj.desc || '—';
             return `<div class="inj-card${resolved?' inj-resolved':''}">
               <div class="inj-card-top">
                 <div class="inj-card-info">
-                  <div class="inj-card-desc">${titre}</div>
+                  <div class="inj-card-desc">${inj.desc||'—'}</div>
                   <div class="inj-card-meta">
                     <span>📅 ${d}</span>
-                    ${inj.categorie?`<span>🏷 ${inj.categorie}</span>`:''}
+                    ${inj.type?`<span>🏷 ${inj.type}</span>`:''}
+                    ${inj.localisation?`<span>📍 ${inj.localisation}</span>`:''}
                     ${inj.duration?`<span>⏱ ${inj.duration}</span>`:''}
                     <span class="inj-perturbe-badge ${inj.perturbeEncore===true||inj.perturbeEncore==='true'?'inj-perturbe-oui':'inj-perturbe-non'}">
                       ${inj.perturbeEncore===true||inj.perturbeEncore==='true'?'⚠ Perturbe encore':'✓ Résolu'}
                     </span>
                     ${inj.perturbeNote?`<span style="font-size:11px;color:var(--orange);font-style:italic">${inj.perturbeNote}</span>`:''}
                   </div>
-                  ${inj.desc&&titre!==inj.desc?`<div style="font-size:11px;color:var(--text-3);margin-top:3px;font-style:italic">${inj.desc}</div>`:''}
                 </div>
                 <div style="display:flex;gap:4px;flex-shrink:0">
                   <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:var(--cyan);border-color:rgba(0,200,230,.3)" onclick="openEditInjury('${_p.id}',${idx})">✏️</button>
@@ -344,34 +353,34 @@ function renderForm(_p){
   <path class="bz2 bz2-0" id="bz2_pied_g" data-zone="pied_g" onclick="clickBodyZone2(event,'pied_g')" d="M332 961.5L338 939.5L360 927L382.5 934L409.5 969V977.5H338L332 961.5Z"><title>Pied G</title></path>
   <path class="bz2 bz2-0" id="bz2_tete_b" data-zone="tete_b" onclick="clickBodyZone2(event,'tete_b')" d="M1033.5 34.5L1057 30.5L1081 38L1095 55V85.5H1102.5V97.5L1091.5 111L1081 137L1053.5 120.5L1027.5 137L1015.5 111L1009.5 97.5V85.5H1015.5V55L1033.5 34.5Z"><title>Tête</title></path>
   <path class="bz2 bz2-0" id="bz2_nuque" data-zone="nuque" onclick="clickBodyZone2(event,'nuque')" d="M1028.5 136.5L1055 122L1081.5 136.5L1087 163.5H1022.5L1028.5 136.5Z"><title>Nuque</title></path>
-  <path class="bz2 bz2-0" id="bz2_omoplate_g" data-zone="omoplate_g" onclick="clickBodyZone2(event,'omoplate_g')" d="M1003.5 219L972 212.5L945.5 256L959 284.5L993 297.5H1029.5L1003.5 219Z"><title>Omoplate G</title></path>
-  <path class="bz2 bz2-0" id="bz2_omoplate_d" data-zone="omoplate_d" onclick="clickBodyZone2(event,'omoplate_d')" d="M1079 296.5L1104.5 219.5L1138.5 213.5L1149.5 244L1163.5 256.5L1149.5 285.5L1122 296.5H1079Z"><title>Omoplate D</title></path>
+  <path class="bz2 bz2-0" id="bz2_omoplate_d" data-zone="omoplate_d" onclick="clickBodyZone2(event,'omoplate_d')" d="M1003.5 219L972 212.5L945.5 256L959 284.5L993 297.5H1029.5L1003.5 219Z"><title>Omoplate D</title></path>
+  <path class="bz2 bz2-0" id="bz2_omoplate_g" data-zone="omoplate_g" onclick="clickBodyZone2(event,'omoplate_g')" d="M1079 296.5L1104.5 219.5L1138.5 213.5L1149.5 244L1163.5 256.5L1149.5 285.5L1122 296.5H1079Z"><title>Omoplate G</title></path>
   <path class="bz2 bz2-0" id="bz2_dorsal" data-zone="dorsal" onclick="clickBodyZone2(event,'dorsal')" d="M958.5 284L963 323L975 357.5L980.5 389L970.5 428.5H1000L1012.5 433.5L1052 453.5L1105 428.5L1136.5 433.5L1133.5 360.5L1152 311.5V284L1124.5 297.5H1081.5L1064 339.5H1044L1026.5 297.5"><title>Grand Dorsal</title></path>
-  <path class="bz2 bz2-0" id="bz2_fessier_g" data-zone="fessier_g" onclick="clickBodyZone2(event,'fessier_g')" d="M961.5 489.5L972.5 435V428.5H996.5L1018 435L1051.5 455V532.5L1002.5 538.5L976.5 518L961.5 489.5Z"><title>Fessier G</title></path>
-  <path class="bz2 bz2-0" id="bz2_fessier_d" data-zone="fessier_d" onclick="clickBodyZone2(event,'fessier_d')" d="M1093 542.5L1055 533.5V452L1104.5 427.5L1138.5 437L1148 492.5L1125 528.5L1093 542.5Z"><title>Fessier D</title></path>
-  <path class="bz2 bz2-0" id="bz2_triceps_g" data-zone="triceps_g" onclick="clickBodyZone2(event,'triceps_g')" d="M895.5 344.5L911 268.5L945.5 255L957 286V307.5L939.5 362.5H931.5L915.5 368L904 362.5L895.5 344.5Z"><title>Triceps G</title></path>
-  <path class="bz2 bz2-0" id="bz2_triceps_d" data-zone="triceps_d" onclick="clickBodyZone2(event,'triceps_d')" d="M1152.5 283.5L1163.5 257L1176 268.5H1197L1209.5 310L1214.5 345.5L1203 363.5L1189.5 368.5L1170 359L1152.5 310V283.5Z"><title>Triceps D</title></path>
-  <path class="bz2 bz2-0" id="bz2_coude_g" data-zone="coude_g" onclick="clickBodyZone2(event,'coude_g')" d="M897.5 386.5L904 363.5L920 368L931.5 363.5L920 395L897.5 391V386.5Z"><title>Coude G</title></path>
-  <path class="bz2 bz2-0" id="bz2_coude_d" data-zone="coude_d" onclick="clickBodyZone2(event,'coude_d')" d="M1190 393L1178 365.5L1190 370L1205 365.5L1211 393H1190Z"><title>Coude D</title></path>
-  <path class="bz2 bz2-0" id="bz2_avbras_g_b" data-zone="avbras_g_b" onclick="clickBodyZone2(event,'avbras_g_b')" d="M878 377L896.5 344.5L905.5 364.5L896.5 390.5L920 396L932 364.5L940.5 361L932 400L883.5 484.5H867L857 478.5L878 377Z"><title>Avant-bras G</title></path>
-  <path class="bz2 bz2-0" id="bz2_avbras_d_b" data-zone="avbras_d_b" onclick="clickBodyZone2(event,'avbras_d_b')" d="M1179.5 365.5L1171 360.5V374.5L1179.5 400.5L1226.5 485H1243L1253 476.5L1234 382L1215.5 345.5L1205 365.5L1210.5 392.5H1189.5L1179.5 365.5Z"><title>Avant-bras D</title></path>
-  <path class="bz2 bz2-0" id="bz2_main_g_b" data-zone="main_g_b" onclick="clickBodyZone2(event,'main_g_b')" d="M835 490.5L856.5 478.5L869 483.5H887.5V497L873.5 558L860.5 567.5H843L835 561.5L829.5 554.5L835 516L814.5 521L808.5 516L835 490.5Z"><title>Main G</title></path>
-  <path class="bz2 bz2-0" id="bz2_main_d_b" data-zone="main_d_b" onclick="clickBodyZone2(event,'main_d_b')" d="M1225.5 510V484.5H1242L1252 477.5L1280 493.5L1301 515L1294 521L1274.5 515L1280 559.5L1267.5 568H1252L1242 559.5L1236.5 554.5L1225.5 510Z"><title>Main D</title></path>
-  <path class="bz2 bz2-0" id="bz2_ischio_g" data-zone="ischio_g" onclick="clickBodyZone2(event,'ischio_g')" d="M952.5 560.5L961.5 492.5L972 515L998.5 536L1028.5 541.5L1053.5 532L1049.5 595.5L1028.5 684.5L1017.5 680.5L990.5 676.5L972 684.5L957.5 637L952.5 560.5Z"><title>Ischio-jambier G</title></path>
-  <path class="bz2 bz2-0" id="bz2_ischio_d" data-zone="ischio_d" onclick="clickBodyZone2(event,'ischio_d')" d="M1059 589.5V536.5L1095 543.5L1123 530L1150 492.5L1159.5 577.5L1140 682L1123 676.5L1088.5 682L1082.5 695L1059 589.5Z"><title>Ischio-jambier D</title></path>
-  <path class="bz2 bz2-0" id="bz2_poplit_g" data-zone="poplit_g" onclick="clickBodyZone2(event,'poplit_g')" d="M967 717.5L972 686L988.5 678H1003.5L1030.5 686V704L1023.5 721.5L1018 717.5V712L999 704L982 717.5H967Z"><title>Creux Poplité G</title></path>
-  <path class="bz2 bz2-0" id="bz2_poplit_d" data-zone="poplit_d" onclick="clickBodyZone2(event,'poplit_d')" d="M1085.5 724L1081.5 692.5L1088.5 682.5L1123 678.5L1140 685.5L1143.5 699V719.5L1129 715L1119 705.5H1110L1091.5 715V724H1085.5Z"><title>Creux Poplité D</title></path>
-  <path class="bz2 bz2-0" id="bz2_genou_g_b" data-zone="genou_g_b" onclick="clickBodyZone2(event,'genou_g_b')" d="M998 733L982 718L998 706L1019.5 713V722H1014L998 733Z"><title>Genou G</title></path>
-  <path class="bz2 bz2-0" id="bz2_genou_d_b" data-zone="genou_d_b" onclick="clickBodyZone2(event,'genou_d_b')" d="M1106 723H1092.5V713.5L1106 708H1120L1128.5 717.5L1115 736.5L1106 723Z"><title>Genou D</title></path>
-  <path class="bz2 bz2-0" id="bz2_mollet_g" data-zone="mollet_g" onclick="clickBodyZone2(event,'mollet_g')" d="M959.5 767L967.5 718H984L998 731L1019.5 718L1024.5 725.5L1034 758.5L1030 816L1024.5 888.5V912V926.5L1005.5 912H998L988.5 926.5L984 917V888.5L967.5 816L959.5 767Z"><title>Mollet G</title></path>
-  <path class="bz2 bz2-0" id="bz2_mollet_d" data-zone="mollet_d" onclick="clickBodyZone2(event,'mollet_d')" d="M1106 725H1085.5L1079 760V801.5L1085.5 857.5V911V926L1106 911L1127 926L1130.5 919L1127 896L1138 844L1152.5 772L1142.5 719H1127L1113 733L1106 725Z"><title>Mollet D</title></path>
-  <path class="bz2 bz2-0" id="bz2_chev_g_b" data-zone="chev_g_b" onclick="clickBodyZone2(event,'chev_g_b')" d="M991 935.5L986 928L1003.5 911L1028 925.5L1025.5 935.5H991Z"><title>Cheville G</title></path>
-  <path class="bz2 bz2-0" id="bz2_chev_d_b" data-zone="chev_d_b" onclick="clickBodyZone2(event,'chev_d_b')" d="M1085.5 938.5V928L1105 912.5L1126.5 928L1122 938.5L1105 934.5L1085.5 938.5Z"><title>Cheville D</title></path>
-  <path class="bz2 bz2-0" id="bz2_pied_g_b" data-zone="pied_g_b" onclick="clickBodyZone2(event,'pied_g_b')" d="M975 942L986.5 928.5L990.5 938H1022.5H1029.5V950V967.5L1004 978L981 967.5H968.5L959 957V950L975 942Z"><title>Pied G</title></path>
-  <path class="bz2 bz2-0" id="bz2_pied_d_b" data-zone="pied_d_b" onclick="clickBodyZone2(event,'pied_d_b')" d="M1083 959.5L1087.5 939.5L1095 936H1110L1124 939.5L1129 930.5L1139.5 947.5H1148.5L1155.5 953.5V959.5L1148.5 967H1134.5L1124 971.5L1110 977.5H1095L1083 971.5V959.5Z"><title>Pied D</title></path>
+  <path class="bz2 bz2-0" id="bz2_fessier_d" data-zone="fessier_d" onclick="clickBodyZone2(event,'fessier_d')" d="M961.5 489.5L972.5 435V428.5H996.5L1018 435L1051.5 455V532.5L1002.5 538.5L976.5 518L961.5 489.5Z"><title>Fessier D</title></path>
+  <path class="bz2 bz2-0" id="bz2_fessier_g" data-zone="fessier_g" onclick="clickBodyZone2(event,'fessier_g')" d="M1093 542.5L1055 533.5V452L1104.5 427.5L1138.5 437L1148 492.5L1125 528.5L1093 542.5Z"><title>Fessier G</title></path>
+  <path class="bz2 bz2-0" id="bz2_triceps_d" data-zone="triceps_d" onclick="clickBodyZone2(event,'triceps_d')" d="M895.5 344.5L911 268.5L945.5 255L957 286V307.5L939.5 362.5H931.5L915.5 368L904 362.5L895.5 344.5Z"><title>Triceps D</title></path>
+  <path class="bz2 bz2-0" id="bz2_triceps_g" data-zone="triceps_g" onclick="clickBodyZone2(event,'triceps_g')" d="M1152.5 283.5L1163.5 257L1176 268.5H1197L1209.5 310L1214.5 345.5L1203 363.5L1189.5 368.5L1170 359L1152.5 310V283.5Z"><title>Triceps G</title></path>
+  <path class="bz2 bz2-0" id="bz2_coude_d" data-zone="coude_d" onclick="clickBodyZone2(event,'coude_d')" d="M897.5 386.5L904 363.5L920 368L931.5 363.5L920 395L897.5 391V386.5Z"><title>Coude D</title></path>
+  <path class="bz2 bz2-0" id="bz2_coude_g" data-zone="coude_g" onclick="clickBodyZone2(event,'coude_g')" d="M1190 393L1178 365.5L1190 370L1205 365.5L1211 393H1190Z"><title>Coude G</title></path>
+  <path class="bz2 bz2-0" id="bz2_avbras_d_b" data-zone="avbras_d_b" onclick="clickBodyZone2(event,'avbras_d_b')" d="M878 377L896.5 344.5L905.5 364.5L896.5 390.5L920 396L932 364.5L940.5 361L932 400L883.5 484.5H867L857 478.5L878 377Z"><title>Avant-bras D</title></path>
+  <path class="bz2 bz2-0" id="bz2_avbras_g_b" data-zone="avbras_g_b" onclick="clickBodyZone2(event,'avbras_g_b')" d="M1179.5 365.5L1171 360.5V374.5L1179.5 400.5L1226.5 485H1243L1253 476.5L1234 382L1215.5 345.5L1205 365.5L1210.5 392.5H1189.5L1179.5 365.5Z"><title>Avant-bras G</title></path>
+  <path class="bz2 bz2-0" id="bz2_main_d_b" data-zone="main_d_b" onclick="clickBodyZone2(event,'main_d_b')" d="M835 490.5L856.5 478.5L869 483.5H887.5V497L873.5 558L860.5 567.5H843L835 561.5L829.5 554.5L835 516L814.5 521L808.5 516L835 490.5Z"><title>Main D</title></path>
+  <path class="bz2 bz2-0" id="bz2_main_g_b" data-zone="main_g_b" onclick="clickBodyZone2(event,'main_g_b')" d="M1225.5 510V484.5H1242L1252 477.5L1280 493.5L1301 515L1294 521L1274.5 515L1280 559.5L1267.5 568H1252L1242 559.5L1236.5 554.5L1225.5 510Z"><title>Main G</title></path>
+  <path class="bz2 bz2-0" id="bz2_ischio_d" data-zone="ischio_d" onclick="clickBodyZone2(event,'ischio_d')" d="M952.5 560.5L961.5 492.5L972 515L998.5 536L1028.5 541.5L1053.5 532L1049.5 595.5L1028.5 684.5L1017.5 680.5L990.5 676.5L972 684.5L957.5 637L952.5 560.5Z"><title>Ischio-jambier D</title></path>
+  <path class="bz2 bz2-0" id="bz2_ischio_g" data-zone="ischio_g" onclick="clickBodyZone2(event,'ischio_g')" d="M1059 589.5V536.5L1095 543.5L1123 530L1150 492.5L1159.5 577.5L1140 682L1123 676.5L1088.5 682L1082.5 695L1059 589.5Z"><title>Ischio-jambier G</title></path>
+  <path class="bz2 bz2-0" id="bz2_poplit_d" data-zone="poplit_d" onclick="clickBodyZone2(event,'poplit_d')" d="M967 717.5L972 686L988.5 678H1003.5L1030.5 686V704L1023.5 721.5L1018 717.5V712L999 704L982 717.5H967Z"><title>Creux Poplité D</title></path>
+  <path class="bz2 bz2-0" id="bz2_poplit_g" data-zone="poplit_g" onclick="clickBodyZone2(event,'poplit_g')" d="M1085.5 724L1081.5 692.5L1088.5 682.5L1123 678.5L1140 685.5L1143.5 699V719.5L1129 715L1119 705.5H1110L1091.5 715V724H1085.5Z"><title>Creux Poplité G</title></path>
+  <path class="bz2 bz2-0" id="bz2_genou_d_b" data-zone="genou_d_b" onclick="clickBodyZone2(event,'genou_d_b')" d="M998 733L982 718L998 706L1019.5 713V722H1014L998 733Z"><title>Genou D</title></path>
+  <path class="bz2 bz2-0" id="bz2_genou_g_b" data-zone="genou_g_b" onclick="clickBodyZone2(event,'genou_g_b')" d="M1106 723H1092.5V713.5L1106 708H1120L1128.5 717.5L1115 736.5L1106 723Z"><title>Genou G</title></path>
+  <path class="bz2 bz2-0" id="bz2_mollet_d" data-zone="mollet_d" onclick="clickBodyZone2(event,'mollet_d')" d="M959.5 767L967.5 718H984L998 731L1019.5 718L1024.5 725.5L1034 758.5L1030 816L1024.5 888.5V912V926.5L1005.5 912H998L988.5 926.5L984 917V888.5L967.5 816L959.5 767Z"><title>Mollet D</title></path>
+  <path class="bz2 bz2-0" id="bz2_mollet_g" data-zone="mollet_g" onclick="clickBodyZone2(event,'mollet_g')" d="M1106 725H1085.5L1079 760V801.5L1085.5 857.5V911V926L1106 911L1127 926L1130.5 919L1127 896L1138 844L1152.5 772L1142.5 719H1127L1113 733L1106 725Z"><title>Mollet G</title></path>
+  <path class="bz2 bz2-0" id="bz2_chev_d_b" data-zone="chev_d_b" onclick="clickBodyZone2(event,'chev_d_b')" d="M991 935.5L986 928L1003.5 911L1028 925.5L1025.5 935.5H991Z"><title>Cheville D</title></path>
+  <path class="bz2 bz2-0" id="bz2_chev_g_b" data-zone="chev_g_b" onclick="clickBodyZone2(event,'chev_g_b')" d="M1085.5 938.5V928L1105 912.5L1126.5 928L1122 938.5L1105 934.5L1085.5 938.5Z"><title>Cheville G</title></path>
+  <path class="bz2 bz2-0" id="bz2_pied_d_b" data-zone="pied_d_b" onclick="clickBodyZone2(event,'pied_d_b')" d="M975 942L986.5 928.5L990.5 938H1022.5H1029.5V950V967.5L1004 978L981 967.5H968.5L959 957V950L975 942Z"><title>Pied D</title></path>
+  <path class="bz2 bz2-0" id="bz2_pied_g_b" data-zone="pied_g_b" onclick="clickBodyZone2(event,'pied_g_b')" d="M1083 959.5L1087.5 939.5L1095 936H1110L1124 939.5L1129 930.5L1139.5 947.5H1148.5L1155.5 953.5V959.5L1148.5 967H1134.5L1124 971.5L1110 977.5H1095L1083 971.5V959.5Z"><title>Pied G</title></path>
   <path class="bz2 bz2-0" id="bz2_trap_b" data-zone="trap_b" onclick="clickBodyZone2(event,'trap_b')" d="M955 200L1023.5 163.5H1086.5L1154.5 200L1102 221L1061.5 339.5H1043.5L1003.5 216.5L955 200Z"><title>Trapèze</title></path>
-  <path class="bz2 bz2-0" id="bz2_epaule_g_b" data-zone="epaule_g_b" onclick="clickBodyZone2(event,'epaule_g_b')" d="M929.5 208.5L953 201.5L971 213L947.5 252L909.5 268.5L913.5 238.5L929.5 208.5Z"><title>Épaule G</title></path>
-  <path class="bz2 bz2-0" id="bz2_epaule_d_b" data-zone="epaule_d_b" onclick="clickBodyZone2(event,'epaule_d_b')" d="M1154.5 202L1137.5 213L1150.5 244L1175.5 266L1200.5 270.5V258.5L1191.5 224.5L1175.5 207L1154.5 202Z"><title>Épaule D</title></path>
+  <path class="bz2 bz2-0" id="bz2_epaule_d_b" data-zone="epaule_d_b" onclick="clickBodyZone2(event,'epaule_d_b')" d="M929.5 208.5L953 201.5L971 213L947.5 252L909.5 268.5L913.5 238.5L929.5 208.5Z"><title>Épaule D</title></path>
+  <path class="bz2 bz2-0" id="bz2_epaule_g_b" data-zone="epaule_g_b" onclick="clickBodyZone2(event,'epaule_g_b')" d="M1154.5 202L1137.5 213L1150.5 244L1175.5 266L1200.5 270.5V258.5L1191.5 224.5L1175.5 207L1154.5 202Z"><title>Épaule G</title></path>
 </svg>
       </div>
       <div id="bm2Legend" class="bm2-legend">
