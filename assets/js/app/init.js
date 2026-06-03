@@ -114,29 +114,10 @@ function importJSON(){
           existingIds.add(p.id);
           added++;
         } else {
-          // Fusionner sessions : nouvelles ajoutées, existantes complétées champ par champ
-          const SESSION_MERGE_FIELDS = ['gn','aiPrevention','ta','po','dt','mgPct',
-            'lgMainDom','formulePlis',
-            'pliPectoral','pliAxillaire','pliTriceps','pliSousScap','pliAbdomen','pliSupraIli','pliCuisse','pliBiceps',
-            'tourCuisse','tourBras','tourTaille','tourBuste'];
+          // Fusionner sessions inconnues (par sid)
+          const existingSids = new Set((existing.sessions||[]).map(s=>s.sid));
           (migrated.sessions||[]).forEach(s=>{
-            const existingSess = (existing.sessions||[]).find(x=>x.sid===s.sid);
-            if(!existingSess){
-              existing.sessions.push(s); updated++;
-            } else {
-              // Compléter les champs vides avec les données importées
-              SESSION_MERGE_FIELDS.forEach(f=>{
-                if((existingSess[f]===undefined||existingSess[f]===null||existingSess[f]==='') && s[f]){
-                  existingSess[f]=s[f]; updated++;
-                }
-              });
-              // Fusionner les scores (d) : compléter les clés manquantes
-              if(s.d) Object.keys(s.d).forEach(k=>{
-                if(existingSess.d===undefined) existingSess.d={};
-                if(existingSess.d[k]===undefined||existingSess.d[k]===null||existingSess.d[k]==='')
-                  existingSess.d[k]=s.d[k];
-              });
-            }
+            if(!existingSids.has(s.sid)){ existing.sessions.push(s); updated++; }
           });
           // Fusionner blessures inconnues (par id)
           const existingInjIds = new Set((existing.injuries||[]).map(x=>x.id));
