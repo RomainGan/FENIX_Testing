@@ -327,7 +327,7 @@ function cancelInjury(){
 // Mapping localisation + côté → IDs zones SVG BM2
 const LOC_TO_ZONES = {
   'Pied':              {G:['pied_g','chev_g'],    D:['pied_d','chev_d'],    B:['pied_g','chev_g','pied_d','chev_d']},
-  'Cheville':          {G:['chev_g','jambe_g'],   D:['chev_d','jambe_d'],   B:['chev_g','jambe_g','chev_d','jambe_d']},
+  'Cheville':          {G:['chev_g','chev_g_b'],   D:['chev_d','chev_d_b'],   B:['chev_g','chev_g_b','chev_d','chev_d_b']},
   'Tibia / Péroné':    {G:['jambe_g'],            D:['jambe_d'],            B:['jambe_g','jambe_d']},
   'Genou':             {G:['genou_g','poplit_g'],  D:['genou_d','poplit_d'], B:['genou_g','poplit_g','genou_d','poplit_d']},
   'Cuisse':            {G:['ischio_g','quad_g'],   D:['ischio_d','quad_d'],  B:['ischio_g','quad_g','ischio_d','quad_d']},
