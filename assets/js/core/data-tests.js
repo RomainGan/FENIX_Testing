@@ -84,7 +84,16 @@ const TESTS=[
     {id:'t10',num:10,name:'Shoulder FMS',desc:'Mobilité globale de l\'épaule — FMS',bilateral:true,
      type:'numeric',unit:'cm',hint:'Réf: lg. de la main',
      thr:[{s:0,l:'Douleur'},{s:1,l:'> 1,5× lg main'},{s:2,l:'= lg main'},{s:3,l:'< lg main'}],
-     auto:null,
+     auto:(v,sess)=>{
+       const ecart=parseFloat(v);
+       if(isNaN(ecart)||v==='') return null;
+       if(ecart<0) return 0;
+       const lgMain=parseFloat(sess&&sess.lgMainDom);
+       if(isNaN(lgMain)||lgMain<=0) return null;
+       if(ecart>lgMain*1.5) return 1;
+       if(ecart>lgMain) return 2;
+       return 3;
+     },
      crit:[
        {s:0,t:'Douleurs et impossibilité de réaliser le test'},
        {s:1,t:'Grand manque d\'amplitude — distance représentant 1,5× la longueur de la main'},
