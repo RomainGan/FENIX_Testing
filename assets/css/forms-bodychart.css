@@ -27,11 +27,8 @@
 
 /* Grille de champs */
 .fiche-grid {
-  display:flex; flex-wrap:wrap;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
   gap:12px;
-}
-.fiche-grid > .fiche-field {
-  flex:1 1 160px; min-width:0;
 }
 .fiche-grid-wide {
   display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
