@@ -28,13 +28,14 @@
 /* Grille de champs */
 .fiche-grid {
   display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:12px;
+  gap:12px; align-items:stretch;
 }
 .fiche-grid-wide {
   display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
   gap:12px;
 }
-.fiche-field { display:flex; flex-direction:column; gap:4px; }
+.fiche-field { display:flex; flex-direction:column; gap:4px; justify-content:space-between; }
+.fiche-field .fiche-input, .fiche-field .fiche-select { flex:1; }
 .fiche-label {
   font-family:'Bebas Neue',sans-serif; font-size:10px;
   letter-spacing:2px; color:var(--text-3);
@@ -57,14 +58,15 @@
 .fiche-age-display {
   background:rgba(0,0,0,.25); border:1px solid var(--border-2);
   border-radius:7px; padding:8px 10px;
-  color:var(--cyan); font-family:'Bebas Neue',sans-serif;
-  font-size:18px; letter-spacing:1px; width:100%; text-align:center;
+  color:var(--cyan); font-family:'Barlow',sans-serif;
+  font-size:13px; font-weight:700; letter-spacing:0.5px; width:100%; text-align:center;
 }
-/* Cellule Âge réduite */
+/* Cellule Âge réduite — colonne fixe dans la grille */
 .fiche-field-age {
-  min-width:70px !important;
-  max-width:90px !important;
-  flex:0 0 80px !important;
+  grid-column: span 1;
+  width: 90px !important;
+  min-width: 70px !important;
+  max-width: 100px !important;
 }
 
 /* Plis cutanés */
