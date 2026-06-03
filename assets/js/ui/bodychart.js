@@ -9,12 +9,12 @@ function renderInjFormHTML(pid){
     <!-- Ligne 1 : Date + Catégorie -->
     <div class="inj-form-grid">
       <div>
-        <label>Date de la lésion</label>
-        <input type="month" id="injDate">
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Date de la lésion</label>
+        <input type="date" id="injDate" style="background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;width:100%;box-sizing:border-box">
       </div>
       <div>
-        <label>Catégorie</label>
-        <select id="injCategorie">
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Catégorie</label>
+        <select id="injCategorie" style="background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;width:100%;box-sizing:border-box">
           <option value="">— Sélectionner —</option>
           <option value="Musculaire">Musculaire</option>
           <option value="Articulaire">Articulaire</option>
@@ -29,8 +29,8 @@ function renderInjFormHTML(pid){
     <!-- Ligne 2 : Appellation + Localisation -->
     <div class="inj-form-grid">
       <div>
-        <label>Appellation</label>
-        <select id="injType">
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Appellation</label>
+        <select id="injType" style="background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;width:100%;box-sizing:border-box">
           <option value="">— Sélectionner —</option>
           <option>Entorse</option>
           <option>Luxation</option>
@@ -48,8 +48,8 @@ function renderInjFormHTML(pid){
         </select>
       </div>
       <div>
-        <label>Localisation</label>
-        <select id="injLocalisation">
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Localisation</label>
+        <select id="injLocalisation" style="background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;width:100%;box-sizing:border-box">
           <option value="">— Sélectionner —</option>
           <optgroup label="Membre inférieur">
             <option>Pied</option>
@@ -85,7 +85,7 @@ function renderInjFormHTML(pid){
     <!-- Ligne 3 : Côté + Durée -->
     <div class="inj-form-grid">
       <div>
-        <label>Côté</label>
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Côté</label>
         <div style="display:flex;gap:6px;margin-top:4px">
           <button class="inj-toggle-btn" id="injCoteG" onclick="setInjCote('G')" style="flex:1">Gauche</button>
           <button class="inj-toggle-btn" id="injCoteD" onclick="setInjCote('D')" style="flex:1">Droite</button>
@@ -93,13 +93,10 @@ function renderInjFormHTML(pid){
         </div>
       </div>
       <div>
-        <label>Durée d'indisponibilité</label>
+        <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Durée d'indisponibilité</label>
         <div style="display:flex;gap:6px;margin-top:4px">
-          <input type="number" id="injDurNb" min="0" placeholder="Ex: 3"
-            style="width:70px;background:rgba(0,0,0,.3);border:1px solid var(--border-2);
-              border-radius:6px;padding:7px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px">
-          <select id="injDurUnit" style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border-2);
-            border-radius:6px;padding:7px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px">
+          <input type="text" inputmode="numeric" id="injDurNb" min="0" placeholder="Ex: 3" style="width:70px;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;box-sizing:border-box">
+          <select id="injDurUnit" style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;box-sizing:border-box">
             <option value="semaine(s)">Semaine(s)</option>
             <option value="mois">Mois</option>
           </select>
@@ -109,21 +106,19 @@ function renderInjFormHTML(pid){
 
     <!-- Description libre -->
     <div>
-      <label>Description / Notes complémentaires</label>
-      <input type="text" id="injDesc" placeholder="Ex: Grade II, récidive, opéré…">
+      <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Description / Notes complémentaires</label>
+      <input type="text" id="injDesc" placeholder="Ex: Grade II, récidive, opéré…" style="background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;width:100%;box-sizing:border-box">
     </div>
 
     <!-- Perturbe encore -->
     <div>
-      <label>Perturbe encore le fonctionnement ?</label>
+      <label style="display:block;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text-3);margin-bottom:5px">Perturbe encore le fonctionnement ?</label>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <div class="inj-perturbe-toggle">
           <button class="inj-toggle-btn active-oui" id="injBtn_oui" onclick="setInjPerturbe(true)">⚠ Oui</button>
           <button class="inj-toggle-btn" id="injBtn_non" onclick="setInjPerturbe(false)">✓ Non / Résolu</button>
         </div>
-        <input type="text" id="injPerturbeNote" placeholder="Préciser si oui (contrainte motrice, psychologique…)"
-          style="flex:1;min-width:200px;background:rgba(0,0,0,.3);border:1px solid var(--border-2);
-            border-radius:6px;padding:7px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px">
+        <input type="text" id="injPerturbeNote" placeholder="Préciser si oui (contrainte motrice, psychologique…)" style="flex:1;min-width:200px;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -668,7 +663,7 @@ function renderInjurySection(p){
       <div class="injury-form-row">
         <div>
           <div class="field-label">Date *</div>
-          <input type="month" class="field-input" id="injDate" style="width:100%">
+          <input type="date" class="field-input" id="injDate" style="width:100%">
         </div>
         <div>
           <div class="field-label">Indisponibilité</div>
