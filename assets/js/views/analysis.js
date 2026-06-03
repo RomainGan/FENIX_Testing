@@ -372,11 +372,15 @@ function saveInjury(pid){
   const bc=getCurrSess(p).bodyChart||{};
   const zonesFromChart=Object.entries(bc).filter(([,lvl])=>lvl>0).map(([id,lvl])=>({id,lvl}));
 
-  // Zones automatiques depuis localisation + côté
+  // Zones automatiques depuis localisation + côté (nouveau mapping)
   const coteKey=cote==='G'?'G':cote==='D'?'D':cote==='B'?'B':'D';
   const autoZoneIds=(LOC_TO_ZONES[localisation]||{})[coteKey]||[];
-  const autoZones=autoZoneIds.filter(id=>!bc[id]).map(id=>({id,lvl:1}));
-  const zones=[...zonesFromChart,...autoZones].filter((z,i,arr)=>arr.findIndex(x=>x.id===z.id)===i);
+  const autoZones=autoZoneIds.map(id=>({id,lvl:bc[id]||1}));
+  // En mode édition : reconstruire les zones depuis le nouveau mapping uniquement
+  // (on ne réinjecte pas les anciennes zones de la blessure)
+  const zones=autoZones.length>0
+    ? autoZones.filter((z,i,arr)=>arr.findIndex(x=>x.id===z.id)===i)
+    : zonesFromChart.filter((z,i,arr)=>arr.findIndex(x=>x.id===z.id)===i);
 
   const entry={
     date:dateVal, categorie, type, localisation, cote,
