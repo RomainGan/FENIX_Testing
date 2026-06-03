@@ -245,17 +245,6 @@ function renderForm(_p){
           <input class="fiche-input" type="number" step="0.5" value="${p.tourBuste||''}" placeholder="—" onchange="uf('tourBuste',this.value)">
         </div>
       </div>
-
-      <!-- Longueur main dominante -->
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--text-3);margin:16px 0 8px">
-        MESURE MAIN DOMINANTE
-      </div>
-      <div class="fiche-grid" style="margin-bottom:0">
-        <div class="fiche-field">
-          <div class="fiche-label">Longueur main dominante (cm) <span style="font-size:10px;color:var(--text-3)">— Réf. Shoulder FMS</span></div>
-          <input class="fiche-input" type="number" step="0.1" value="${p.lgMainDom||''}" placeholder="Ex: 19.5" oninput="uf('lgMainDom',this.value)">
-        </div>
-      </div>
     </div>
   </div>
 
@@ -436,7 +425,7 @@ function renderForm(_p){
         let html='';
         if(t.thr){
           html+=`<div class="raw-unit">${t.unit}</div>`;
-          html+=`<input type="number" class="raw-input" value="${rawVal}" placeholder="${t.unit}" onchange="uRaw('${scoreKey}','${rawKey}',this.value,'${t.id}')">`;
+          html+=`<input type="text" inputmode="decimal" class="raw-input" value="${rawVal}" placeholder="${t.unit}" onchange="uRaw('${scoreKey}','${rawKey}',this.value,'${t.id}')">`;
         }
         html+=scoreBtns(scoreKey,curVal);
         if(t.thr){
