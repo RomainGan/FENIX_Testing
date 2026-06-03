@@ -552,7 +552,10 @@ function renderForm(_p){
   // Global notes
   h+=`<div class="notes-section">
     <div class="notes-section-title">📝 Notes Générales</div>
-    <textarea class="notes-global" placeholder="Observations générales, contexte de la séance…" onchange="uf('gn',this.value)">${p.gn||''}</textarea>
+    <textarea class="notes-global" placeholder="Observations générales, contexte de la séance…"
+      oninput="uf('gn',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      style="overflow:hidden;resize:none"
+    >${p.gn||''}</textarea>
   </div>`;
 
   document.getElementById('mainContent').innerHTML=h;
@@ -560,5 +563,10 @@ function renderForm(_p){
   (function(){
     const _rp=players.find(function(x){return x.id===_p.id;});
     if(_rp) refreshBodyMap2Classes(getSess(_rp,getCurrSidx(_rp)), getInjZoneIds(_rp));
+  })();
+  // Auto-resize textarea notes au chargement
+  (function(){
+    const ta=document.querySelector('textarea.notes-global');
+    if(ta){ ta.style.overflow='hidden'; ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
   })();
 }
