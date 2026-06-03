@@ -88,7 +88,14 @@ const TESTS=[
        const ecart=parseFloat(v);
        if(isNaN(ecart)||v==='') return null;
        if(ecart<0) return 0;
-       const lgMain=parseFloat(sess&&sess.lgMainDom);
+       let lgMain=parseFloat(sess&&sess.lgMainDom);
+       if(isNaN(lgMain)||lgMain<=0){
+         try{
+           const _p=(typeof players!=='undefined'&&typeof cPid!=='undefined')?players.find(x=>x.id===cPid):null;
+           const _s=_p?getCurrSess(_p):null;
+           lgMain=parseFloat(_s&&_s.lgMainDom);
+         }catch(e){}
+       }
        if(isNaN(lgMain)||lgMain<=0) return null;
        if(ecart>lgMain*1.5) return 1;
        if(ecart>lgMain) return 2;
