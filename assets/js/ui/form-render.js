@@ -100,13 +100,15 @@ function renderForm(_p){
             <option value="F" ${_p.sexe==='F'?'selected':''}>Femme</option>
           </select>
         </div>
-        <div class="fiche-field">
+        <div class="fiche-field" style="flex:1 1 220px">
           <div class="fiche-label">Date de naissance</div>
-          <input class="fiche-input" type="date" value="${_p.ddn||''}" onchange="uf('ddn',this.value)">
-        </div>
-        <div class="fiche-field fiche-field-age">
-          <div class="fiche-label">Âge</div>
-          <div class="fiche-input" style="display:flex;align-items:center;justify-content:center;color:var(--cyan);font-weight:700;letter-spacing:1px;text-align:center">${ageCalc!==null?ageCalc+' ans':'—'}</div>
+          <div style="display:flex;gap:8px;align-items:stretch">
+            <input class="fiche-input" type="date" value="${_p.ddn||''}" onchange="uf('ddn',this.value)" style="flex:1">
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:70px;max-width:80px">
+              <div class="fiche-label">Âge</div>
+              <div class="fiche-input" style="display:flex;align-items:center;justify-content:center;color:var(--cyan);font-weight:700;letter-spacing:1px;text-align:center;white-space:nowrap">${ageCalc!==null?ageCalc+' ans':'—'}</div>
+            </div>
+          </div>
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Groupe</div>
