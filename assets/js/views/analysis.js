@@ -296,13 +296,12 @@ function openEditInjury(pid, idx){
   _injCote = inj.cote||'';
   renderForm(p);
   setTimeout(()=>{
-    const d=document.getElementById('injDate');
     const cat=document.getElementById('injCategorie');
     const t=document.getElementById('injType');
     const loc=document.getElementById('injLocalisation');
     const desc=document.getElementById('injDesc');
     const note=document.getElementById('injPerturbeNote');
-    if(d&&inj.date) d.value=inj.date.slice(0,7);
+    if(inj.date) setInjDateFields(inj.date);
     if(cat&&inj.categorie) cat.value=inj.categorie;
     if(t&&inj.type) t.value=inj.type;
     if(loc&&inj.localisation) loc.value=inj.localisation;
@@ -369,7 +368,7 @@ function saveInjury(pid){
   const autoDesc = [type, localisation, cote==='G'?'Gauche':cote==='D'?'Droite':cote==='B'?'Bilatéral':''].filter(Boolean).join(' ');
   if(!autoDesc && !desc){ alert('Veuillez renseigner au minimum une appellation ou une localisation.'); return; }
 
-  const dateVal=date?(date+'-01'):'';
+  const dateVal=date||'';
   const bc=getCurrSess(p).bodyChart||{};
   const zonesFromChart=Object.entries(bc).filter(([,lvl])=>lvl>0).map(([id,lvl])=>({id,lvl}));
 
