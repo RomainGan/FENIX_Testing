@@ -91,7 +91,7 @@ function renderForm(_p){
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Nom</div>
-          <input class="fiche-input" value="${_p.n}" onchange="uf('n',this.value)" placeholder="MARTIN">
+          <input class="fiche-input" value="${_p.n}" onchange="uf('n',this.value.toUpperCase())" placeholder="MARTIN" style="text-transform:uppercase">
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Sexe</div>
@@ -106,7 +106,7 @@ function renderForm(_p){
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Âge</div>
-          <div class="fiche-age-display">${ageCalc!==null?ageCalc+' ans':'—'}</div>
+          <div class="fiche-input" style="display:flex;align-items:center;color:var(--cyan);font-weight:700;letter-spacing:1px">${ageCalc!==null?ageCalc+' ans':'—'}</div>
         </div>
         <div class="fiche-field">
           <div class="fiche-label">Groupe</div>
