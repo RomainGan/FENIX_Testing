@@ -125,6 +125,10 @@ function renderForm(_p){
           <input class="fiche-input" value="${_p.pos||''}" onchange="uf('pos',this.value)" placeholder="Ailier Gauche">
         </div>
         <div class="fiche-field">
+          <div class="fiche-label">Email du joueur</div>
+          <input class="fiche-input" type="email" value="${_p.email||''}" onchange="uf('email',this.value)" placeholder="joueur@email.com">
+        </div>
+        <div class="fiche-field">
           <div class="fiche-label">Main Dominante</div>
           <select class="fiche-select" onchange="uf('mainDom',this.value)">
             <option value="" ${!_p.mainDom?'selected':''}>— Sélectionner —</option>

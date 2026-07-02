@@ -49,8 +49,9 @@ function addPlayer(){
   if(!pr||!n){ alert('Prénom et Nom requis.'); return; }
   const gr=document.getElementById('mGroupe').value.trim(), pos=document.getElementById('mPoste').value.trim();
   const ddn=document.getElementById('mDdn').value, dt=document.getElementById('mDate').value;
+  const emailEl=document.getElementById('mEmail'); const email=emailEl?emailEl.value.trim():'';
   const essai=document.getElementById('mEssai').checked;
-  const p={id:Date.now().toString(),pr,n,gr,pos,ddn,essai,
+  const p={id:Date.now().toString(),pr,n,gr,pos,ddn,essai,email,
     sexe:'H',mainDom:'',
     injuries:[],
     sessions:[{sid:Date.now().toString()+'_s0',dt,ta:'',po:'',
@@ -59,7 +60,7 @@ function addPlayer(){
       tourCuisse:'',tourBras:'',tourTaille:'',tourBuste:'',
       mgPct:'',bodyChart:{},d:{},gn:'',aiPrevention:''}]};
   players.push(p); save(); closeModal(); renderList(); selPlayer(p.id);
-  ['mPrenom','mNom','mGroupe','mPoste','mDdn'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['mPrenom','mNom','mGroupe','mPoste','mDdn','mEmail'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('mEssai').checked=false;
 }
 
