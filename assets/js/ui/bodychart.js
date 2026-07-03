@@ -135,21 +135,28 @@ function renderInjFormHTML(pid){
           <optgroup label="Membre inférieur">
             <option>Pied</option>
             <option>Cheville</option>
-            <option>Tibia / Péroné</option>
+            <option>Tibia</option>
+            <option>Mollet</option>
             <option>Genou</option>
-            <option>Cuisse</option>
-            <option>Hanche</option>
-            <option>Aine / Adducteurs</option>
-            <option>Fessier</option>
+            <option>Creux poplité</option>
+            <option>Quadriceps</option>
+            <option>Ischio-jambiers</option>
+            <option>Adducteurs / Aine</option>
+            <option>Fessier / Hanche</option>
           </optgroup>
           <optgroup label="Tronc">
-            <option>Lombaires</option>
             <option>Abdominaux</option>
+            <option>Obliques</option>
             <option>Côtes</option>
-            <option>Colonne vertébrale</option>
+            <option>Lombaires / Dos</option>
+            <option>Pectoraux</option>
+            <option>Grand dorsal</option>
+            <option>Trapèzes</option>
+            <option>Omoplate</option>
           </optgroup>
           <optgroup label="Membre supérieur">
             <option>Épaule</option>
+            <option>Bras / Triceps</option>
             <option>Coude</option>
             <option>Avant-bras</option>
             <option>Poignet</option>
@@ -783,7 +790,6 @@ function syncInjDate(){
   const m=document.getElementById('injDateM')?.value||'';
   const a=document.getElementById('injDateA')?.value||'';
   const hidden=document.getElementById('injDate');
-  // Mois + Année suffisent ; jour par défaut à 01 si non renseigné
   if(hidden) hidden.value=(a&&m)?(a+'-'+m+'-'+(j||'01')):'';
 }
 function setInjDateFields(dateStr){
