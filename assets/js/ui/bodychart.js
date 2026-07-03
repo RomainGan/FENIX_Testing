@@ -783,7 +783,8 @@ function syncInjDate(){
   const m=document.getElementById('injDateM')?.value||'';
   const a=document.getElementById('injDateA')?.value||'';
   const hidden=document.getElementById('injDate');
-  if(hidden) hidden.value=(a&&m&&j)?(a+'-'+m+'-'+j):'';
+  // Mois + Année suffisent ; jour par défaut à 01 si non renseigné
+  if(hidden) hidden.value=(a&&m)?(a+'-'+m+'-'+(j||'01')):'';
 }
 function setInjDateFields(dateStr){
   // dateStr format YYYY-MM-DD
