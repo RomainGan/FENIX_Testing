@@ -326,9 +326,12 @@ function cancelInjury(){
 }
 // Mapping localisation + côté → IDs zones SVG BM2
 const LOC_TO_ZONES = {
+  // Vue ANATOMIQUE :
+  //  - FACE : gauche patient = DROITE image → zones _g (label déjà correct)
+  //  - DOS  : gauche patient = GAUCHE image → zones _d sont à gauche image
+  //           donc pour "Gauche patient" sur le dos, on prend la zone _d.
+  // Résumé : zones de face gardent leur label ; zones de dos (_b et dorsales) inversées.
   // ── Membre inférieur ──
-  // Note : les zones "_b" (dos) ont leurs labels D/G inversés dans le SVG
-  // par rapport à l'anatomie réelle → on inverse ici pour compenser.
   'Pied':               {G:['pied_g','pied_d_b'],   D:['pied_d','pied_g_b'],   B:['pied_g','pied_g_b','pied_d','pied_d_b']},
   'Cheville':           {G:['chev_g','chev_d_b'],   D:['chev_d','chev_g_b'],   B:['chev_g','chev_g_b','chev_d','chev_d_b']},
   'Tibia':              {G:['jambe_g'],             D:['jambe_d'],             B:['jambe_g','jambe_d']},
@@ -349,6 +352,7 @@ const LOC_TO_ZONES = {
   'Trapèzes':           {G:['trap_d'],              D:['trap_g'],              B:['trap_g','trap_d','trap_b']},
   'Omoplate':           {G:['omoplate_d'],          D:['omoplate_g'],          B:['omoplate_g','omoplate_d']},
   // ── Membre supérieur ──
+  //   Épaule/Avant-bras/Main ont une partie face (_g/_d) et une partie dos (_b)
   'Épaule':             {G:['epaule_g','epaule_d_b'],D:['epaule_d','epaule_g_b'],B:['epaule_g','epaule_g_b','epaule_d','epaule_d_b']},
   'Bras / Triceps':     {G:['triceps_d'],           D:['triceps_g'],           B:['triceps_g','triceps_d']},
   'Coude':              {G:['coude_g'],             D:['coude_d'],             B:['coude_g','coude_d']},
