@@ -327,16 +327,18 @@ function cancelInjury(){
 // Mapping localisation + côté → IDs zones SVG BM2
 const LOC_TO_ZONES = {
   // ── Membre inférieur ──
-  'Pied':               {G:['pied_g','pied_g_b'],   D:['pied_d','pied_d_b'],   B:['pied_g','pied_g_b','pied_d','pied_d_b']},
-  'Cheville':           {G:['chev_g','chev_g_b'],   D:['chev_d','chev_d_b'],   B:['chev_g','chev_g_b','chev_d','chev_d_b']},
+  // Note : les zones "_b" (dos) ont leurs labels D/G inversés dans le SVG
+  // par rapport à l'anatomie réelle → on inverse ici pour compenser.
+  'Pied':               {G:['pied_g','pied_d_b'],   D:['pied_d','pied_g_b'],   B:['pied_g','pied_g_b','pied_d','pied_d_b']},
+  'Cheville':           {G:['chev_g','chev_d_b'],   D:['chev_d','chev_g_b'],   B:['chev_g','chev_g_b','chev_d','chev_d_b']},
   'Tibia':              {G:['jambe_g'],             D:['jambe_d'],             B:['jambe_g','jambe_d']},
-  'Mollet':             {G:['mollet_g'],            D:['mollet_d'],            B:['mollet_g','mollet_d']},
+  'Mollet':             {G:['mollet_d'],            D:['mollet_g'],            B:['mollet_g','mollet_d']},
   'Genou':              {G:['genou_g'],             D:['genou_d'],             B:['genou_g','genou_d']},
-  'Creux poplité':      {G:['poplit_g'],            D:['poplit_d'],            B:['poplit_g','poplit_d']},
+  'Creux poplité':      {G:['poplit_d'],            D:['poplit_g'],            B:['poplit_g','poplit_d']},
   'Quadriceps':         {G:['quad_g'],              D:['quad_d'],              B:['quad_g','quad_d']},
-  'Ischio-jambiers':    {G:['ischio_g'],            D:['ischio_d'],            B:['ischio_g','ischio_d']},
+  'Ischio-jambiers':    {G:['ischio_d'],            D:['ischio_g'],            B:['ischio_g','ischio_d']},
   'Adducteurs / Aine':  {G:['adduct_g','adduct_g2'],D:['adduct_d','adduct_d2'],B:['adduct_g','adduct_g2','adduct_d','adduct_d2']},
-  'Fessier / Hanche':   {G:['fessier_g'],           D:['fessier_d'],           B:['fessier_g','fessier_d']},
+  'Fessier / Hanche':   {G:['fessier_d'],           D:['fessier_g'],           B:['fessier_g','fessier_d']},
   // ── Tronc ──
   'Abdominaux':         {G:['abdomen'],             D:['abdomen'],             B:['abdomen']},
   'Obliques':           {G:['oblique_g'],           D:['oblique_d'],           B:['oblique_g','oblique_d']},
@@ -344,15 +346,15 @@ const LOC_TO_ZONES = {
   'Lombaires / Dos':    {G:['dorsal'],              D:['dorsal'],              B:['dorsal']},
   'Pectoraux':          {G:['pec_g'],               D:['pec_d'],               B:['pec_g','pec_d']},
   'Grand dorsal':       {G:['dorsal'],              D:['dorsal'],              B:['dorsal']},
-  'Trapèzes':           {G:['trap_g'],              D:['trap_d'],              B:['trap_g','trap_d','trap_b']},
-  'Omoplate':           {G:['omoplate_g'],          D:['omoplate_d'],          B:['omoplate_g','omoplate_d']},
+  'Trapèzes':           {G:['trap_d'],              D:['trap_g'],              B:['trap_g','trap_d','trap_b']},
+  'Omoplate':           {G:['omoplate_d'],          D:['omoplate_g'],          B:['omoplate_g','omoplate_d']},
   // ── Membre supérieur ──
-  'Épaule':             {G:['epaule_g','epaule_g_b'],D:['epaule_d','epaule_d_b'],B:['epaule_g','epaule_g_b','epaule_d','epaule_d_b']},
-  'Bras / Triceps':     {G:['triceps_g'],           D:['triceps_d'],           B:['triceps_g','triceps_d']},
+  'Épaule':             {G:['epaule_g','epaule_d_b'],D:['epaule_d','epaule_g_b'],B:['epaule_g','epaule_g_b','epaule_d','epaule_d_b']},
+  'Bras / Triceps':     {G:['triceps_d'],           D:['triceps_g'],           B:['triceps_g','triceps_d']},
   'Coude':              {G:['coude_g'],             D:['coude_d'],             B:['coude_g','coude_d']},
-  'Avant-bras':         {G:['avbras_g','avbras_g_b'],D:['avbras_d','avbras_d_b'],B:['avbras_g','avbras_g_b','avbras_d','avbras_d_b']},
+  'Avant-bras':         {G:['avbras_g','avbras_d_b'],D:['avbras_d','avbras_g_b'],B:['avbras_g','avbras_g_b','avbras_d','avbras_d_b']},
   'Poignet':            {G:['poignet_g'],           D:['poignet_d'],           B:['poignet_g','poignet_d']},
-  'Main / Doigts':      {G:['main_g','main_g_b'],   D:['main_d','main_d_b'],   B:['main_g','main_g_b','main_d','main_d_b']},
+  'Main / Doigts':      {G:['main_g','main_d_b'],   D:['main_d','main_g_b'],   B:['main_g','main_g_b','main_d','main_d_b']},
   // ── Tête / Cou ──
   'Nuque / Cou':        {G:['nuque','cou_f'],       D:['nuque','cou_f'],       B:['nuque','cou_f']},
   'Tête':               {G:['tete_f','tete_b'],     D:['tete_f','tete_b'],     B:['tete_f','tete_b']},
