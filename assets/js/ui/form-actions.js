@@ -123,7 +123,8 @@ function selPlayer(id){
 function showView(v){
   window._currentView=v;
   const navBtns=document.querySelectorAll('.nav-btn');
-  navBtns.forEach((b,i)=>b.classList.toggle('active',(v==='testing'&&i===0)||(v==='rapport'&&i===1)||(v==='comp'&&i===2)||(v==='recap'&&i===3)));
+  navBtns.forEach((b,i)=>b.classList.toggle('active',(v==='testing'&&i===0)||(v==='session'&&i===1)||(v==='rapport'&&i===2)||(v==='comp'&&i===3)||(v==='recap'&&i===4)));
+  if(v==='session'){ renderSession(); return; }
   if(v==='recap'){ cPid=null; renderList(); renderRecap(); }
   else if(v==='comp'){ renderComp(); }
   else if(v==='rapport'){
