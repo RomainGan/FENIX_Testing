@@ -7,6 +7,7 @@ let _sessSelectedIds = [];   // joueurs participant à la séance
 let _sessTestId = null;      // test en cours
 let _sessStep = 'select';    // 'select' | 'grid'
 let _sessSide = 'g';         // pour tests bilatéraux : côté en cours de saisie
+let _sessSessionIdx = {};    // {pid: index de la session-séance créée au démarrage}
 
 // Initiales d'un joueur
 function _sessIni(n, pr){
@@ -102,8 +103,40 @@ function sessSelectNone(){ _sessSelectedIds=[]; renderSession(); }
 function sessStart(){
   if(_sessSelectedIds.length===0) return;
   if(!_sessTestId) _sessTestId=_sessAllTests()[0]?.id;
+
+  // Créer une NOUVELLE session datée du jour pour chaque joueur sélectionné
+  const today=new Date().toISOString().split('T')[0];
+  _sessSessionIdx={}; // mémorise l'index de la session-séance de chaque joueur
+  _sessSelectedIds.forEach(pid=>{
+    const p=players.find(x=>x.id===pid);
+    if(!p) return;
+    if(!p.sessions) p.sessions=[];
+    const last=p.sessions.length? p.sessions[p.sessions.length-1] : {};
+    const sess={
+      sid:Date.now().toString()+'_'+pid,
+      dt:today,
+      ta:last.ta||'', po:last.po||'',
+      pliBiceps:'',pliTriceps:'',pliSousScap:'',pliSupraIli:'',
+      pliPectoral:'',pliAxillaire:'',pliAbdomen:'',pliCuisse:'',
+      tourCuisse:'',tourBras:'',tourTaille:'',tourBuste:'',
+      lgMainDom:last.lgMainDom||'',
+      mgPct:'', bodyChart:{}, d:{}, gn:'', aiPrevention:''
+    };
+    p.sessions.push(sess);
+    _sessSessionIdx[pid]=p.sessions.length-1;
+  });
+  save();
+
   _sessStep='grid';
   renderSession();
+}
+
+// Récupère la session-séance d'un joueur (créée au démarrage), sinon la dernière
+function _sessGetSess(p){
+  if(window._sessSessionIdx && _sessSessionIdx[p.id]!==undefined && p.sessions[_sessSessionIdx[p.id]]){
+    return p.sessions[_sessSessionIdx[p.id]];
+  }
+  return getSess(p, p.sessions.length-1);
 }
 function sessBackToSelect(){ _sessStep='select'; renderSession(); }
 
@@ -123,7 +156,7 @@ function _sessRenderGrid(){
     .sort((a,b)=>(a.n||'').localeCompare(b.n||''));
 
   const cells=parts.map(p=>{
-    const sess=getSess(p, p.sessions.length-1);
+    const sess=_sessGetSess(p);
     const d=sess.d||{};
     let scoreDisplay='', bg='var(--navy-3)', txtCol='var(--text)';
 
@@ -190,15 +223,6 @@ function _sessRenderGrid(){
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
       ${cells}
     </div>
-  </div>
-
-  <!-- Popup de saisie -->
-  <div id="sessEntryModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(3,8,18,.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-    z-index:99999;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto"
-    onclick="if(event.target===this)sessCloseEntry()">
-    <div id="sessEntryBox" style="background:#0a1424;border:1px solid var(--border-2);border-radius:16px;
-      padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.7);margin:auto"></div>
   </div>`;
 }
 
@@ -223,11 +247,27 @@ function sessNextTest(){
 function sessOpenEntry(pid){
   const p=players.find(x=>x.id===pid); if(!p) return;
   const test=_sessGetTest(_sessTestId);
-  const sess=getSess(p, p.sessions.length-1);
+  const sess=_sessGetSess(p);
   const d=sess.d||{};
+
+  // Créer / récupérer la modale directement dans <body> (évite les conflits de positionnement)
+  let modal=document.getElementById('sessEntryModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='sessEntryModal';
+    modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(3,8,18,.9);'
+      +'z-index:2147483647;display:flex;align-items:flex-start;justify-content:center;'
+      +'padding:40px 20px;overflow-y:auto;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)';
+    modal.onclick=function(e){ if(e.target===modal) sessCloseEntry(); };
+    const box=document.createElement('div');
+    box.id='sessEntryBox';
+    box.style.cssText='background:#0a1424;border:1px solid var(--border-2);border-radius:16px;'
+      +'padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:auto';
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+  }
   const box=document.getElementById('sessEntryBox');
-  const modal=document.getElementById('sessEntryModal');
-  if(!box||!modal) return;
+  if(!box) return;
 
   // Barème (thresholds) pour aide visuelle
   const thrHtml=(test.thr||[]).map(t=>
@@ -328,14 +368,14 @@ function _sessNextPlayerBtn(pid){
 
 function sessCloseEntry(){
   const modal=document.getElementById('sessEntryModal');
-  if(modal) modal.style.display='none';
+  if(modal){ modal.style.display='none'; modal.remove(); }
   renderSession();
 }
 
 // Sauvegarde d'un score depuis la séance (sur la dernière session du joueur)
 function sessSetScore(pid, side, val){
   const p=players.find(x=>x.id===pid); if(!p) return;
-  const sess=getSess(p, p.sessions.length-1);
+  const sess=_sessGetSess(p);
   if(!sess.d) sess.d={};
   const key=_sessTestId+(side?'_'+side:'');
   sess.d[key]=val;
@@ -346,7 +386,7 @@ function sessSetScore(pid, side, val){
 // Sauvegarde d'une valeur brute + calcul auto éventuel
 function sessSetRaw(pid, side, rawVal){
   const p=players.find(x=>x.id===pid); if(!p) return;
-  const sess=getSess(p, p.sessions.length-1);
+  const sess=_sessGetSess(p);
   if(!sess.d) sess.d={};
   const rawKey=_sessTestId+(side?'_'+side:'')+'_raw';
   const scoreKey=_sessTestId+(side?'_'+side:'');
@@ -367,7 +407,7 @@ function sessSetRaw(pid, side, rawVal){
 
 function sessSetNote(pid, val){
   const p=players.find(x=>x.id===pid); if(!p) return;
-  const sess=getSess(p, p.sessions.length-1);
+  const sess=_sessGetSess(p);
   if(!sess.d) sess.d={};
   sess.d[_sessTestId+'_nt']=val;
   save();
