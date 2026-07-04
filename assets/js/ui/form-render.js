@@ -118,6 +118,7 @@ function renderForm(_p){
             <option value="-18" ${_p.gr==='-18'?'selected':''}>-18</option>
             <option value="CF" ${_p.gr==='CF'?'selected':''}>CF</option>
             <option value="Essai" ${_p.gr==='Essai'?'selected':''}>Essai</option>
+            <option value="Partenaire" ${_p.gr==='Partenaire'?'selected':''}>Partenaire</option>
           </select>
         </div>
         <div class="fiche-field">
