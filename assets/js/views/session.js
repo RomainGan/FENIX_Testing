@@ -193,10 +193,12 @@ function _sessRenderGrid(){
   </div>
 
   <!-- Popup de saisie -->
-  <div id="sessEntryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
-    z-index:9999;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)sessCloseEntry()">
-    <div id="sessEntryBox" style="background:var(--navy-1);border:1px solid var(--border-2);border-radius:16px;
-      padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)"></div>
+  <div id="sessEntryModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(3,8,18,.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    z-index:99999;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto"
+    onclick="if(event.target===this)sessCloseEntry()">
+    <div id="sessEntryBox" style="background:#0a1424;border:1px solid var(--border-2);border-radius:16px;
+      padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.7);margin:auto"></div>
   </div>`;
 }
 
