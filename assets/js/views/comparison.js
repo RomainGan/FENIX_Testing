@@ -16,7 +16,7 @@ function renderComp(){
 }
 
 function compPlayerOptions(selectedId){
-  return players.map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${p.pr} ${p.n} — ${p.pos||'—'}</option>`).join('');
+  return players.map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${fmtName(p.n,p.pr)} — ${p.pos||'—'}</option>`).join('');
 }
 function compSessionOptions(pid, selectedSidx){
   const p=players.find(x=>x.id===pid); if(!p||!p.sessions) return '';
@@ -136,7 +136,7 @@ function renderComp1v1Body(){
   h+=`</div>`;
 
   h+=`<div class="comp-score-block">
-    <div class="comp-score-block-title">TEST PAR TEST — ${pA.pr} ${pA.n} (${dtA}) vs ${pB.pr} ${pB.n} (${dtB})</div>
+    <div class="comp-score-block-title">TEST PAR TEST — ${fmtName(pA.n,pA.pr)} (${dtA}) vs ${fmtName(pB.n,pB.pr)} (${dtB})</div>
     <table class="comp-test-table">
       <thead><tr>
         <th>Test</th>
@@ -186,7 +186,7 @@ function renderComp1v1Body(){
 
   if(pA.id===pB.id && (pA.sessions||[]).length>=2){
     h+=`<div class="comp-evo-wrap">
-      <div class="comp-evo-title">ÉVOLUTION DANS LE TEMPS — ${pA.pr} ${pA.n}</div>
+      <div class="comp-evo-title">ÉVOLUTION DANS LE TEMPS — ${fmtName(pA.n,pA.pr)}</div>
       <canvas id="evoChart" height="120"></canvas>
     </div>`;
   }
@@ -258,7 +258,7 @@ function buildEquipeTable(){
     const nbSess=(p.sessions||[]).length;
     h+=`<tr onclick="cPid='${p.id}';cSessionIdx=null;showView('testing')" style="cursor:pointer">
       <td style="color:var(--text-3);font-family:'DM Mono',monospace">${i+1}</td>
-      <td><div style="font-weight:700;color:var(--text)">${p.pr} ${p.n}</div></td>
+      <td><div style="font-weight:700;color:var(--text)">${fmtName(p.n,p.pr)}</div></td>
       <td style="color:var(--text-3)">${p.pos||'—'}</td>
       <td style="color:var(--text-3)">${dt}</td>
       ${catDefs.map(c=>{
@@ -295,7 +295,7 @@ function renderRecap(){
     const nbInj=(p.injuries||[]).length;
     h+=`<tr class="test-row" onclick="selPlayer('${p.id}');showView('testing')" style="cursor:pointer">
       <td class="test-num">${i+1}</td>
-      <td><div style="display:flex;align-items:center;gap:10px"><div class="player-avatar" style="width:32px;height:32px;font-size:12px">${ini(p.n,p.pr)}</div><div><div class="test-name">${p.pr} ${p.n}</div><div class="player-group">${p.pos||'—'}</div></div></div></td>
+      <td><div style="display:flex;align-items:center;gap:10px"><div class="player-avatar" style="width:32px;height:32px;font-size:12px">${ini(p.n,p.pr)}</div><div><div class="test-name">${fmtName(p.n,p.pr)}</div><div class="player-group">${p.pos||'—'}</div></div></div></td>
       <td><span style="font-size:12px;color:var(--text-3)">${p.gr||'—'}</span></td>
       <td class="center"><span class="player-score-pill ${cls}">${p.sc.t}%</span></td>
       <td class="center" style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:16px">${p.sc.s3}</td>
