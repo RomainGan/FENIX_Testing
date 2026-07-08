@@ -163,7 +163,7 @@ function renderRapport(_p){
   const morpho = buildProfilMorpho(p, sc);
 
   // Topbar
-  document.getElementById('topbarTitle').textContent = (_p.pr+' '+_p.n).toUpperCase()+' — RAPPORT';
+  document.getElementById('topbarTitle').textContent = fmtName(_p.n,_p.pr)+' — RAPPORT';
   document.getElementById('topbarMeta').textContent  = (_p.gr||'')+(_p.pos?' — '+_p.pos:'');
   document.getElementById('dateChip').textContent    = ds;
   const tb=document.getElementById('topbarAvatar');
@@ -324,7 +324,7 @@ function renderRapport(_p){
     <!-- Identité -->
     <div style="flex:1">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;
-        color:var(--text);line-height:1">${p.pr} ${p.n}</div>
+        color:var(--text);line-height:1">${fmtName(p.n,p.pr)}</div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;
         letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px">
         ${p.gr||'Fenix Toulouse'}${p.pos?' · '+p.pos:''}</div>
@@ -521,7 +521,7 @@ function renderRapport(_p){
     + 'letter-spacing:4px;color:rgba(0,200,230,.04);line-height:1;pointer-events:none">FENIX</div>'
     + '<div>'
     + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;letter-spacing:2px;color:var(--text);line-height:1">'
-    + p.pr+' '+p.n+'</div>'
+    + fmtName(p.n,p.pr)+'</div>'
     + '<div style="font-size:10px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-top:2px">'
     + (p.gr||'Fenix Toulouse')+(p.pos?' · '+p.pos:'')+'</div>'
     + '</div>'
@@ -732,7 +732,7 @@ function buildA4Dom(p){
       line-height:1;pointer-events:none">FENIX</div>
 
     <div style="flex:1">
-      <div style="font-size:22px;font-weight:800;letter-spacing:2px;color:#e8eef8;line-height:1;margin-bottom:2px">${p.pr} ${p.n}</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:2px;color:#e8eef8;line-height:1;margin-bottom:2px">${fmtName(p.n,p.pr)}</div>
       <div style="font-size:11px;letter-spacing:1px;color:#00c8e6;margin-bottom:8px;text-transform:uppercase">${p.gr||'Fenix Toulouse'}${p.pos?' · '+p.pos:''}</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px">
         ${p.ta?`<span style="background:#1a2e52;border:1px solid #2a4070;border-radius:4px;padding:2px 8px;font-size:10px;color:#9cb3d4">📏 ${p.ta} cm</span>`:''}
