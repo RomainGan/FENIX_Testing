@@ -9,7 +9,7 @@ function renderForm(_p){
 
   const s = calcScore(_p.id, sidx);
   const ds = p.dt ? new Date(p.dt).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  document.getElementById('topbarTitle').textContent = (_p.pr+' '+_p.n).toUpperCase();
+  document.getElementById('topbarTitle').textContent = fmtName(_p.n,_p.pr) || 'TESTING PHYSIQUE';
   document.getElementById('topbarMeta').textContent = (_p.gr||'')+(_p.pos?' — '+_p.pos:'');
   document.getElementById('dateChip').textContent = ds;
   const tb = document.getElementById('topbarAvatar');
@@ -79,7 +79,7 @@ function renderForm(_p){
   <div class="fiche-section" id="fs_id">
     <div class="fiche-section-hd fiche-hd-id" onclick="toggleFicheSection('id')">
       <span class="section-badge badge-mob">① IDENTITÉ</span>
-      <span class="fiche-section-title">${(_p.pr||_p.n) ? (_p.pr+' '+_p.n).toUpperCase() : 'Identité du Joueur'}</span>
+      <span class="fiche-section-title">${(_p.pr||_p.n) ? fmtName(_p.n,_p.pr) : 'Identité du Joueur'}</span>
       <div class="athlete-avatar-big" onclick="event.stopPropagation();triggerPhoto('${_p.id}')" title="Photo" style="width:44px;height:44px;font-size:16px;flex-shrink:0">${avatarInner}</div>
       <span class="section-chevron open" id="chev_id" style="margin-left:8px">▼</span>
     </div>
