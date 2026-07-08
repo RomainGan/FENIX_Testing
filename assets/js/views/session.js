@@ -65,7 +65,7 @@ function _sessRenderSelect(){
         display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--cyan)">
         ${_sessIni(p.n,p.pr)}</div>
       <div style="min-width:0">
-        <div style="font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n} ${p.pr}</div>
+        <div style="font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtName(p.n,p.pr)}</div>
         <div style="font-size:11px;color:var(--text-3)">${p.gr||'—'}${p.pos?' · '+p.pos:''}</div>
       </div>
     </div>`;
@@ -191,7 +191,7 @@ function _sessRenderGrid(){
       onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform='scale(1)'"
       onmouseleave="this.style.transform='scale(1)'">
       <div style="font-weight:700;font-size:13px;color:${txtCol};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-        ${p.n} ${p.pr}</div>
+        ${fmtName(p.n,p.pr)}</div>
       ${scoreDisplay}
     </div>`;
   }).join('');
@@ -335,7 +335,7 @@ function sessOpenEntry(pid){
       <div style="width:40px;height:40px;border-radius:50%;background:var(--navy-4);flex-shrink:0;
         display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--cyan)">${_sessIni(p.n,p.pr)}</div>
       <div style="flex:1">
-        <div style="font-weight:800;font-size:16px;color:var(--text)">${p.n} ${p.pr}</div>
+        <div style="font-weight:800;font-size:16px;color:var(--text)">${fmtName(p.n,p.pr)}</div>
         <div style="font-size:11px;color:var(--text-3)">${test.num}. ${test.name}</div>
       </div>
       <button onclick="sessCloseEntry()" style="background:none;border:none;color:var(--text-3);
