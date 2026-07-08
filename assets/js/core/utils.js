@@ -129,8 +129,8 @@ function _grpMgrInner(){
     if(g){
       const checks = sorted.map(p=>{
         const on = g.memberIds.includes(p.id);
-        return `<div onclick="grpMgrToggleMember('${p.id}')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid ${on?'var(--cyan)':'var(--border)'};background:${on?'rgba(0,200,230,.1)':'transparent'}">
-          <div style="width:18px;height:18px;border-radius:5px;flex-shrink:0;border:2px solid ${on?'var(--cyan)':'var(--border-2)'};background:${on?'var(--cyan)':'transparent'};display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:800;font-size:11px">${on?'✓':''}</div>
+        return `<div id="grpmem_${p.id}" onclick="grpMgrToggleMember('${p.id}')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid ${on?'var(--cyan)':'var(--border)'};background:${on?'rgba(0,200,230,.1)':'transparent'}">
+          <div class="grpmem-box" style="width:18px;height:18px;border-radius:5px;flex-shrink:0;border:2px solid ${on?'var(--cyan)':'var(--border-2)'};background:${on?'var(--cyan)':'transparent'};display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:800;font-size:11px">${on?'✓':''}</div>
           <span style="font-size:12px;color:var(--text)">${fmtName(p.n,p.pr)}</span>
         </div>`;
       }).join('');
@@ -140,7 +140,7 @@ function _grpMgrInner(){
             style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;font-weight:600">
           <button class="btn btn-outline" onclick="grpMgrCloseEditor()" style="font-size:12px">✓ Terminé</button>
         </div>
-        <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Coche les membres (${g.memberIds.length} sélectionné(s))</div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Coche les membres (<span id="grpMgrCount">${g.memberIds.length}</span> sélectionné(s))</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;max-height:320px;overflow-y:auto">${checks}</div>
       </div>`;
     }
@@ -189,9 +189,20 @@ function grpMgrToggleMember(pid){
   const groups=_loadSessGroups(); const g=groups.find(x=>x.id===_grpMgrEditId);
   if(!g) return;
   const i=g.memberIds.indexOf(pid);
+  const on = i<0; // sera coché après toggle
   if(i>=0) g.memberIds.splice(i,1); else g.memberIds.push(pid);
   localStorage.setItem('ftph_groups',JSON.stringify(groups));
-  _grpMgrRefresh();
+  // Mise à jour ciblée de la case (sans redessiner toute la modale → préserve le scroll)
+  const row=document.getElementById('grpmem_'+pid);
+  if(row){
+    row.style.border='1px solid '+(on?'var(--cyan)':'var(--border)');
+    row.style.background=on?'rgba(0,200,230,.1)':'transparent';
+    const box=row.querySelector('.grpmem-box');
+    if(box){ box.style.border='2px solid '+(on?'var(--cyan)':'var(--border-2)'); box.style.background=on?'var(--cyan)':'transparent'; box.textContent=on?'✓':''; }
+  }
+  // Mettre à jour le compteur
+  const cnt=document.getElementById('grpMgrCount');
+  if(cnt) cnt.textContent=g.memberIds.length;
 }
 
 function renderList(){
