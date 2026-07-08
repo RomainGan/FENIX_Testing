@@ -8,6 +8,37 @@ let _sessTestId = null;      // test en cours
 let _sessStep = 'select';    // 'select' | 'grid'
 let _sessSide = 'g';         // pour tests bilatéraux : côté en cours de saisie
 let _sessSessionIdx = {};    // {pid: index de la session-séance créée au démarrage}
+let _sessManageGroups = false; // panneau de gestion des groupes ouvert ?
+let _sessEditGroupId = null;   // groupe en cours d'édition
+
+// ─── GROUPES DE SÉANCE (stockage séparé : ftph_groups) ────
+function _sessLoadGroups(){
+  try{ return JSON.parse(localStorage.getItem('ftph_groups')||'[]')||[]; }catch(e){ return []; }
+}
+function _sessSaveGroups(groups){
+  localStorage.setItem('ftph_groups', JSON.stringify(groups));
+}
+function _sessCreateGroup(name){
+  const groups=_sessLoadGroups();
+  const g={id:'grp_'+Date.now(), name:name||'Nouveau groupe', memberIds:[]};
+  groups.push(g); _sessSaveGroups(groups);
+  return g.id;
+}
+function _sessDeleteGroup(gid){
+  let groups=_sessLoadGroups().filter(g=>g.id!==gid);
+  _sessSaveGroups(groups);
+}
+function _sessRenameGroup(gid, name){
+  const groups=_sessLoadGroups();
+  const g=groups.find(x=>x.id===gid); if(g){ g.name=name; _sessSaveGroups(groups); }
+}
+function _sessToggleMember(gid, pid){
+  const groups=_sessLoadGroups();
+  const g=groups.find(x=>x.id===gid); if(!g) return;
+  const i=g.memberIds.indexOf(pid);
+  if(i>=0) g.memberIds.splice(i,1); else g.memberIds.push(pid);
+  _sessSaveGroups(groups);
+}
 
 // Initiales d'un joueur
 function _sessIni(n, pr){
@@ -79,6 +110,9 @@ function _sessRenderSelect(){
     </div>
     <div style="font-size:13px;color:var(--text-3);margin-bottom:18px">Coche les athlètes qui participent à la séance, puis démarre.</div>
 
+    ${_sessRenderGroupBar()}
+    ${_sessManageGroups ? _sessRenderGroupManager() : ''}
+
     <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
       <button class="btn btn-outline" onclick="sessSelectAll()" style="font-size:12px">✓ Tout sélectionner</button>
       <button class="btn btn-outline" onclick="sessSelectNone()" style="font-size:12px">✕ Tout désélectionner</button>
@@ -91,6 +125,117 @@ function _sessRenderSelect(){
       ${cards||'<div style="color:var(--text-3);padding:20px">Aucun joueur. Ajoute des joueurs d\'abord.</div>'}
     </div>
   </div>`;
+}
+
+// Barre de sélection rapide par groupe
+function _sessRenderGroupBar(){
+  const groups=_sessLoadGroups();
+  const chips=groups.map(g=>{
+    const members=g.memberIds.filter(id=>players.find(p=>p.id===id));
+    const count=members.length;
+    const active = count>0 && members.every(id=>_sessSelectedIds.includes(id));
+    return `<button onclick="sessSelectGroup('${g.id}')" style="padding:8px 14px;border-radius:20px;
+      border:1px solid var(--cyan);background:${active?'var(--cyan)':'rgba(0,200,230,.08)'};
+      color:${active?'#0a1628':'var(--cyan)'};cursor:pointer;
+      font-size:13px;font-weight:600;white-space:nowrap;transition:all .12s">
+      ${active?'✓':'👥'} ${g.name} <span style="opacity:.7">(${count})</span></button>`;
+  }).join('');
+
+  return `<div style="background:var(--navy-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:${groups.length?'12px':'0'};flex-wrap:wrap">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-3)">GROUPES DE SÉANCE</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" onclick="sessToggleManager()" style="font-size:12px">
+        ${_sessManageGroups?'✕ Fermer la gestion':'⚙️ Gérer les groupes'}</button>
+    </div>
+    ${groups.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${chips}</div>`
+      : `<div style="font-size:12px;color:var(--text-3);font-style:italic">Aucun groupe créé. Clique sur « Gérer les groupes » pour en créer un.</div>`}
+  </div>`;
+}
+
+// Panneau de gestion des groupes (création, renommage, membres)
+function _sessRenderGroupManager(){
+  const groups=_sessLoadGroups();
+  const sorted=[...players].sort((a,b)=>(a.n||'').localeCompare(b.n||''));
+
+  let editorHtml='';
+  if(_sessEditGroupId){
+    const g=groups.find(x=>x.id===_sessEditGroupId);
+    if(g){
+      const memberChecks=sorted.map(p=>{
+        const checked=g.memberIds.includes(p.id);
+        return `<div onclick="sessToggleGroupMember('${g.id}','${p.id}')" style="cursor:pointer;display:flex;
+          align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid ${checked?'var(--cyan)':'var(--border)'};
+          background:${checked?'rgba(0,200,230,.1)':'transparent'}">
+          <div style="width:18px;height:18px;border-radius:5px;flex-shrink:0;border:2px solid ${checked?'var(--cyan)':'var(--border-2)'};
+            background:${checked?'var(--cyan)':'transparent'};display:flex;align-items:center;justify-content:center;
+            color:#0a1628;font-weight:800;font-size:11px">${checked?'✓':''}</div>
+          <span style="font-size:12px;color:var(--text)">${fmtName(p.n,p.pr)}</span>
+        </div>`;
+      }).join('');
+      editorHtml=`
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <input id="grpNameInput" value="${(g.name||'').replace(/"/g,'&quot;')}"
+              onchange="sessRenameGroup('${g.id}',this.value)"
+              style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:8px;
+              padding:8px 12px;color:var(--text);font-size:14px;font-weight:600">
+            <button class="btn btn-outline" onclick="sessCloseGroupEditor()" style="font-size:12px">✓ Terminé</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Coche les membres de ce groupe (${g.memberIds.length} sélectionné(s))</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:340px;overflow-y:auto">
+            ${memberChecks}
+          </div>
+        </div>`;
+    }
+  }
+
+  const groupsList=groups.map(g=>{
+    const count=g.memberIds.filter(id=>players.find(p=>p.id===id)).length;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;
+      background:var(--navy-3);margin-bottom:6px">
+      <span style="flex:1;font-size:13px;font-weight:600;color:var(--text)">👥 ${g.name}</span>
+      <span style="font-size:12px;color:var(--text-3)">${count} membre(s)</span>
+      <button class="btn btn-outline" onclick="sessEditGroup('${g.id}')" style="font-size:11px;padding:4px 10px">✏️ Membres</button>
+      <button class="btn btn-outline" onclick="sessDeleteGroup('${g.id}')" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red-border)">🗑</button>
+    </div>`;
+  }).join('');
+
+  return `<div style="background:var(--navy-1);border:1px solid var(--border-2);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--cyan)">GESTION DES GROUPES</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-cyan" onclick="sessNewGroup()" style="font-size:12px">＋ Nouveau groupe</button>
+    </div>
+    ${groupsList||'<div style="font-size:12px;color:var(--text-3);font-style:italic;padding:6px 0">Aucun groupe. Crée-en un avec le bouton ci-dessus.</div>'}
+    ${editorHtml}
+  </div>`;
+}
+
+// ── Actions groupes ──
+function sessToggleManager(){ _sessManageGroups=!_sessManageGroups; if(!_sessManageGroups) _sessEditGroupId=null; renderSession(); }
+function sessNewGroup(){ const id=_sessCreateGroup('Nouveau groupe'); _sessEditGroupId=id; renderSession(); }
+function sessEditGroup(gid){ _sessEditGroupId=gid; renderSession(); }
+function sessCloseGroupEditor(){ _sessEditGroupId=null; renderSession(); }
+function sessRenameGroup(gid, name){ _sessRenameGroup(gid, name.trim()||'Sans nom'); }
+function sessDeleteGroup(gid){
+  if(!confirm('Supprimer ce groupe ? (les joueurs ne sont pas supprimés)')) return;
+  _sessDeleteGroup(gid);
+  if(_sessEditGroupId===gid) _sessEditGroupId=null;
+  renderSession();
+}
+function sessToggleGroupMember(gid, pid){ _sessToggleMember(gid, pid); renderSession(); }
+function sessSelectGroup(gid){
+  const g=_sessLoadGroups().find(x=>x.id===gid); if(!g) return;
+  const members = g.memberIds.filter(id=>players.find(p=>p.id===id));
+  // Si tous les membres sont déjà sélectionnés → on les retire ; sinon on les ajoute
+  const allIn = members.length>0 && members.every(id=>_sessSelectedIds.includes(id));
+  if(allIn){
+    _sessSelectedIds = _sessSelectedIds.filter(id=>!members.includes(id));
+  } else {
+    members.forEach(id=>{ if(!_sessSelectedIds.includes(id)) _sessSelectedIds.push(id); });
+  }
+  renderSession();
 }
 
 function sessToggle(pid){
