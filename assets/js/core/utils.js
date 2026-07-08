@@ -48,32 +48,180 @@ function ghostSVG(sz){
 }
 
 // ─── PLAYER LIST ──────────────────────────────────────────
+// État des sections de groupe repliées (true = ouvert). Par défaut tout replié.
+const _grpOpen = {};
+
+function _loadSessGroups(){
+  try{ return JSON.parse(localStorage.getItem('ftph_groups')||'[]')||[]; }catch(e){ return []; }
+}
+
+// Génère la carte HTML d'un joueur pour la barre latérale
+function _playerCard(p){
+  const latestSidx = p.sessions ? p.sessions.length-1 : null;
+  const s = calcScore(p.id, latestSidx);
+  const cls = s.t>=70?'pill-green':s.t>=40?'pill-orange':'pill-red';
+  const fc = s.t>=70?'var(--green)':s.t>=40?'var(--orange)':'var(--red)';
+  const pos = p.facePos ? `${p.facePos.x}% ${p.facePos.y}%` : '50% 25%';
+  const av = p.photo ? `<img src="${p.photo}" alt="${p.pr}" style="object-position:${pos}">` : (p.essai ? ghostSVG(22) : ini(p.n,p.pr));
+  const avCls = `player-avatar${p.photo?' has-photo':''}`;
+  return `<div class="player-item${cPid===p.id?' active':''}" onclick="selPlayer('${p.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s${cPid===p.id?';background:var(--navy-3)':''}">
+    <div class="${avCls}">${av}</div>
+    <div style="flex:1;min-width:0">
+      <div class="player-name">${fmtName(p.n,p.pr)}${p.essai?'<span style="font-size:9px;color:var(--gold);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;margin-left:6px">ESSAI</span>':''}</div>
+      <div class="player-group">${p.gr||'—'}</div>
+      ${s.f>0?`<div class="player-prog"><div class="player-prog-fill" style="width:${s.t}%;background:${fc}"></div></div>`:''}
+    </div>
+    ${s.f>0?`<span class="player-score-pill ${cls}">${s.t}%</span>`:''}
+  </div>`;
+}
+
+// Un en-tête de section repliable
+function _grpSection(key, title, count, innerHtml){
+  const open = _grpOpen[key]===true;
+  return `<div class="grp-section" style="border-bottom:1px solid var(--border)">
+    <div onclick="toggleGrpSection('${key}')" style="display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;background:var(--navy-2);user-select:none">
+      <span style="transition:transform .15s;transform:rotate(${open?'90':'0'}deg);color:var(--cyan);font-size:11px">▶</span>
+      <span style="flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--text)">${title}</span>
+      <span style="font-size:11px;color:var(--text-3)">${count}</span>
+    </div>
+    <div style="display:${open?'block':'none'}">${open?innerHtml:''}</div>
+  </div>`;
+}
+
+function toggleGrpSection(key){
+  _grpOpen[key] = _grpOpen[key]===true ? false : true;
+  renderList();
+}
+
+// ─── GESTION DES GROUPES (modale depuis la barre latérale) ──
+let _grpMgrEditId = null;
+function openGroupManager(){
+  _grpMgrEditId = null;
+  let modal = document.getElementById('grpMgrModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'grpMgrModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(3,8,18,.85);'
+      +'z-index:2147483000;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;'
+      +'-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)';
+    modal.onclick = function(e){ if(e.target===modal) closeGroupManager(); };
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = '<div style="background:#0a1424;border:1px solid var(--border-2);border-radius:16px;padding:22px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:auto" onclick="event.stopPropagation()">'+_grpMgrInner()+'</div>';
+  modal.style.display = 'flex';
+}
+function closeGroupManager(){
+  const modal = document.getElementById('grpMgrModal');
+  if(modal){ modal.style.display='none'; modal.remove(); }
+  renderList();
+}
+function _grpMgrRefresh(){
+  const modal = document.getElementById('grpMgrModal');
+  if(modal){ modal.querySelector('div').innerHTML = _grpMgrInner(); }
+}
+function _grpMgrInner(){
+  const groups = _loadSessGroups();
+  const sorted = [...players].sort((a,b)=>(a.n||'').localeCompare(b.n||'','fr'));
+
+  let editor = '';
+  if(_grpMgrEditId){
+    const g = groups.find(x=>x.id===_grpMgrEditId);
+    if(g){
+      const checks = sorted.map(p=>{
+        const on = g.memberIds.includes(p.id);
+        return `<div onclick="grpMgrToggleMember('${p.id}')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid ${on?'var(--cyan)':'var(--border)'};background:${on?'rgba(0,200,230,.1)':'transparent'}">
+          <div style="width:18px;height:18px;border-radius:5px;flex-shrink:0;border:2px solid ${on?'var(--cyan)':'var(--border-2)'};background:${on?'var(--cyan)':'transparent'};display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:800;font-size:11px">${on?'✓':''}</div>
+          <span style="font-size:12px;color:var(--text)">${fmtName(p.n,p.pr)}</span>
+        </div>`;
+      }).join('');
+      editor = `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <input id="grpMgrName" value="${(g.name||'').replace(/"/g,'&quot;')}" onchange="grpMgrRename(this.value)"
+            style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;font-weight:600">
+          <button class="btn btn-outline" onclick="grpMgrCloseEditor()" style="font-size:12px">✓ Terminé</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Coche les membres (${g.memberIds.length} sélectionné(s))</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;max-height:320px;overflow-y:auto">${checks}</div>
+      </div>`;
+    }
+  }
+
+  const list = groups.map(g=>{
+    const count = g.memberIds.filter(id=>players.find(p=>p.id===id)).length;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--navy-3);margin-bottom:6px">
+      <span style="flex:1;font-size:13px;font-weight:600;color:var(--text)">👥 ${g.name}</span>
+      <span style="font-size:12px;color:var(--text-3)">${count}</span>
+      <button class="btn btn-outline" onclick="grpMgrEdit('${g.id}')" style="font-size:11px;padding:4px 10px">✏️ Membres</button>
+      <button class="btn btn-outline" onclick="grpMgrDelete('${g.id}')" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red-border)">🗑</button>
+    </div>`;
+  }).join('');
+
+  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--cyan)">GESTION DES GROUPES</span>
+      <div style="flex:1"></div>
+      <button onclick="closeGroupManager()" style="background:none;border:none;color:var(--text-3);font-size:22px;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">Crée des groupes (ex : « FENIX Saison 2024/2025 ») pour organiser ta barre latérale et le Mode Séance.</div>
+    <button class="btn btn-cyan" onclick="grpMgrNew()" style="font-size:12px;margin-bottom:14px">＋ Nouveau groupe</button>
+    ${list||'<div style="font-size:12px;color:var(--text-3);font-style:italic;padding:6px 0">Aucun groupe pour l\'instant.</div>'}
+    ${editor}`;
+}
+function grpMgrNew(){
+  const groups=_loadSessGroups();
+  const g={id:'grp_'+Date.now(), name:'Nouveau groupe', memberIds:[]};
+  groups.push(g); localStorage.setItem('ftph_groups',JSON.stringify(groups));
+  _grpMgrEditId=g.id; _grpMgrRefresh();
+}
+function grpMgrEdit(gid){ _grpMgrEditId=gid; _grpMgrRefresh(); }
+function grpMgrCloseEditor(){ _grpMgrEditId=null; _grpMgrRefresh(); }
+function grpMgrRename(name){
+  const groups=_loadSessGroups(); const g=groups.find(x=>x.id===_grpMgrEditId);
+  if(g){ g.name=(name.trim()||'Sans nom'); localStorage.setItem('ftph_groups',JSON.stringify(groups)); }
+}
+function grpMgrDelete(gid){
+  if(!confirm('Supprimer ce groupe ? (les joueurs ne sont pas supprimés)')) return;
+  let groups=_loadSessGroups().filter(g=>g.id!==gid);
+  localStorage.setItem('ftph_groups',JSON.stringify(groups));
+  if(_grpMgrEditId===gid) _grpMgrEditId=null;
+  _grpMgrRefresh();
+}
+function grpMgrToggleMember(pid){
+  const groups=_loadSessGroups(); const g=groups.find(x=>x.id===_grpMgrEditId);
+  if(!g) return;
+  const i=g.memberIds.indexOf(pid);
+  if(i>=0) g.memberIds.splice(i,1); else g.memberIds.push(pid);
+  localStorage.setItem('ftph_groups',JSON.stringify(groups));
+  _grpMgrRefresh();
+}
+
 function renderList(){
   const el = document.getElementById('playerList');
   if(!players.length){ el.innerHTML='<div style="padding:8px 12px;font-size:12px;color:var(--text-3)">Aucun joueur</div>'; return; }
-  const sorted = [...players].sort((a,b)=>{
+
+  const sortFn = (a,b)=>{
     const na=(a.n||'').toLowerCase(), nb=(b.n||'').toLowerCase();
     if(na!==nb) return na.localeCompare(nb,'fr');
     return (a.pr||'').toLowerCase().localeCompare((b.pr||'').toLowerCase(),'fr');
+  };
+  const sortedAll = [...players].sort(sortFn);
+  const groups = _loadSessGroups();
+
+  let html = '';
+
+  // Section "Tous les joueurs"
+  const allInner = sortedAll.map(_playerCard).join('');
+  html += _grpSection('__all__', 'Tous les joueurs', sortedAll.length, allInner);
+
+  // Une section par groupe créé
+  groups.forEach(g=>{
+    const members = sortedAll.filter(p=>g.memberIds.includes(p.id));
+    const inner = members.length
+      ? members.map(_playerCard).join('')
+      : '<div style="padding:10px 14px;font-size:12px;color:var(--text-3);font-style:italic">Aucun membre dans ce groupe.</div>';
+    html += _grpSection(g.id, g.name, members.length, inner);
   });
-  el.innerHTML = sorted.map(p=>{
-    const latestSidx = p.sessions ? p.sessions.length-1 : null;
-    const s = calcScore(p.id, latestSidx);
-    const cls = s.t>=70?'pill-green':s.t>=40?'pill-orange':'pill-red';
-    const fc = s.t>=70?'var(--green)':s.t>=40?'var(--orange)':'var(--red)';
-    const pos = p.facePos ? `${p.facePos.x}% ${p.facePos.y}%` : '50% 25%';
-    const av = p.photo ? `<img src="${p.photo}" alt="${p.pr}" style="object-position:${pos}">` : (p.essai ? ghostSVG(22) : ini(p.n,p.pr));
-    const avCls = `player-avatar${p.photo?' has-photo':''}`;
-    return `<div class="${avCls==='player-avatar has-photo'?'player-item':'player-item'}${cPid===p.id?' active':''}" onclick="selPlayer('${p.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s${cPid===p.id?';background:var(--navy-3)':''}">
-      <div class="${avCls}">${av}</div>
-      <div style="flex:1;min-width:0">
-        <div class="player-name">${fmtName(p.n,p.pr)}${p.essai?'<span style="font-size:9px;color:var(--gold);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;margin-left:6px">ESSAI</span>':''}</div>
-        <div class="player-group">${p.gr||'—'}</div>
-        ${s.f>0?`<div class="player-prog"><div class="player-prog-fill" style="width:${s.t}%;background:${fc}"></div></div>`:''}
-      </div>
-      ${s.f>0?`<span class="player-score-pill ${cls}">${s.t}%</span>`:''}
-    </div>`;
-  }).join('');
+
+  el.innerHTML = html;
 }
 
 // ─── FICHE SECTION TOGGLE ─────────────────────────────────
