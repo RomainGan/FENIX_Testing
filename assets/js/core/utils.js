@@ -4,6 +4,17 @@
 const ini = (n,p) => ((p||'?')[0]+(n||'?')[0]).toUpperCase();
 function sColor(s){ return s===3?'green':s===2?'yellow':s===1?'orange':'red'; }
 
+// ─── FORMATAGE DES NOMS ───────────────────────────────────
+// Nom en MAJUSCULES, prénom avec Initiale Majuscule (gère les composés : Jean-Marc, Anne Marie)
+function fmtNom(n){ return (n||'').trim().toUpperCase(); }
+function fmtPrenom(pr){
+  return (pr||'').trim().toLowerCase().replace(/(^|[\s\-'’])([\p{L}])/gu, (m,sep,ch)=>sep+ch.toUpperCase());
+}
+function fmtName(n, pr){
+  const N=fmtNom(n), P=fmtPrenom(pr);
+  return (N+' '+P).trim();
+}
+
 // ─── SCORE ────────────────────────────────────────────────
 function calcScoreFromData(d){
   let s3=0,s2=0,s1=0,s0=0,f=0;const secs={};const TOTAL_MAX=60;let totalPts=0;
@@ -56,7 +67,7 @@ function renderList(){
     return `<div class="${avCls==='player-avatar has-photo'?'player-item':'player-item'}${cPid===p.id?' active':''}" onclick="selPlayer('${p.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s${cPid===p.id?';background:var(--navy-3)':''}">
       <div class="${avCls}">${av}</div>
       <div style="flex:1;min-width:0">
-        <div class="player-name">${p.n.toUpperCase()} ${p.pr}${p.essai?'<span style="font-size:9px;color:var(--gold);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;margin-left:6px">ESSAI</span>':''}</div>
+        <div class="player-name">${fmtName(p.n,p.pr)}${p.essai?'<span style="font-size:9px;color:var(--gold);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;margin-left:6px">ESSAI</span>':''}</div>
         <div class="player-group">${p.gr||'—'}</div>
         ${s.f>0?`<div class="player-prog"><div class="player-prog-fill" style="width:${s.t}%;background:${fc}"></div></div>`:''}
       </div>
