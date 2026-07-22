@@ -143,7 +143,7 @@ const TESTS=[
        {s:2,t:'Maîtrise le travail en chaîne croisée sans compensation'},
        {s:3,t:'Maîtrise le travail unilatéral'}
      ]},
-    {id:'t14',num:14,name:'Copenhagen Plank',desc:'Stabilité adducteurs en appui latéral',bilateral:true,
+    {id:'t14',num:14,name:'Copenhagen Plank',desc:'Stabilité adducteurs en appui latéral',bilateral:true,chrono:true,
      type:'numeric',unit:'s',
      thr:[{s:0,l:'< 30s'},{s:1,l:'30–45s'},{s:2,l:'45–60s'},{s:3,l:'≥ 60s'}],
      auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<30)return 0;if(n<45)return 1;if(n<60)return 2;return 3;},
@@ -153,7 +153,7 @@ const TESTS=[
        {s:2,t:'Bonne exécution technique et temps de travail compris entre 45″ et 60″'},
        {s:3,t:'Bonne exécution technique et temps de travail supérieur à 60″'}
      ]},
-    {id:'t15',num:15,name:'Banana Plank — 10 kg',desc:'Gainage global avec charge',bilateral:false,
+    {id:'t15',num:15,name:'Banana Plank — 10 kg',desc:'Gainage global avec charge',bilateral:false,chrono:true,
      type:'numeric',unit:'s',
      thr:[{s:0,l:'< 30s'},{s:1,l:'30–45s'},{s:2,l:'45–60s'},{s:3,l:'≥ 60s'}],
      auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<30)return 0;if(n<45)return 1;if(n<60)return 2;return 3;},
@@ -163,7 +163,7 @@ const TESTS=[
        {s:2,t:'Bonne exécution technique et temps de travail compris entre 45″ et 60″'},
        {s:3,t:'Bonne exécution technique et temps de travail supérieur à 60″'}
      ]},
-    {id:'t16',num:16,name:'GHD Sorensen — 10 kg',desc:'Extension lombaire isométrique avec charge',bilateral:false,
+    {id:'t16',num:16,name:'GHD Sorensen — 10 kg',desc:'Extension lombaire isométrique avec charge',bilateral:false,chrono:true,
      type:'numeric',unit:'s',
      thr:[{s:0,l:'< 30s'},{s:1,l:'30–45s'},{s:2,l:'45–60s'},{s:3,l:'≥ 60s'}],
      auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<30)return 0;if(n<45)return 1;if(n<60)return 2;return 3;},
@@ -189,7 +189,7 @@ const TESTS=[
        {s:2,t:'Mouvement réalisé avec les mains au niveau du menton sans compensation'},
        {s:3,t:'Mouvement parfait — mains au niveau du front, sans compensation, gainage parfait'}
      ]},
-    {id:'t19',num:19,name:'Stabilité Unipodale sur Pointe',desc:'Équilibre dynamique unipodal',bilateral:true,
+    {id:'t19',num:19,name:'Stabilité Unipodale sur Pointe',desc:'Équilibre dynamique unipodal',bilateral:true,chrono:true,
      type:'numeric',unit:'s',
      thr:[{s:0,l:'< 30s'},{s:1,l:'30–45s'},{s:2,l:'45–60s'},{s:3,l:'≥ 60s'}],
      auto:(v)=>{const n=parseFloat(v);if(isNaN(n)||v==='')return null;if(n<30)return 0;if(n<45)return 1;if(n<60)return 2;return 3;},
