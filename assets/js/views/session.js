@@ -634,6 +634,22 @@ function sessOpenEntry(pid){
   const noteKey=test.id+'_nt';
   const noteVal=d[noteKey]||'';
 
+  // Bloc critères détaillés (affiché au clic sur ℹ️) — seulement si hasInfo
+  let critBlock='';
+  if(test.hasInfo && test.crit && test.crit.length){
+    const critRows=test.crit.map(cr=>{
+      const c=_sessScoreColor(cr.s);
+      return `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="flex-shrink:0;width:20px;height:20px;border-radius:5px;background:${c};color:#0a1628;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center">${cr.s}</span>
+        <span style="font-size:12px;color:var(--text-2);line-height:1.4">${cr.t}</span>
+      </div>`;
+    }).join('');
+    critBlock=`<div id="sessCritBlock" style="display:block;margin:0 0 14px;padding:10px 12px;background:var(--navy-3);border-radius:8px;border:1px solid var(--border-2)">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--cyan);font-weight:700;margin-bottom:6px">CRITÈRES D'ÉVALUATION</div>
+      ${critRows}
+    </div>`;
+  }
+
   box.innerHTML=`
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--navy-4);flex-shrink:0;
@@ -642,10 +658,12 @@ function sessOpenEntry(pid){
         <div style="font-weight:800;font-size:16px;color:var(--text)">${fmtName(p.n,p.pr)}</div>
         <div style="font-size:11px;color:var(--text-3)">${test.num}. ${test.name}</div>
       </div>
+      ${test.hasInfo?`<button onclick="sessToggleCrit()" title="Critères d'évaluation" style="background:none;border:1px solid var(--cyan);border-radius:50%;width:30px;height:30px;color:var(--cyan);font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">ℹ</button>`:''}
       <button onclick="sessCloseEntry()" style="background:none;border:none;color:var(--text-3);
         font-size:22px;cursor:pointer;padding:0 4px">✕</button>
     </div>
     <div style="margin:10px 0 14px;padding:8px 10px;background:var(--navy-3);border-radius:8px;line-height:1.9">${thrHtml}</div>
+    ${critBlock}
     ${bodyHtml}
     <div style="margin-bottom:14px">
       <label style="display:block;font-size:11px;color:var(--text-3);margin-bottom:4px">💬 Commentaire (optionnel)</label>
@@ -659,6 +677,11 @@ function sessOpenEntry(pid){
     </div>`;
 
   modal.style.display='flex';
+}
+
+function sessToggleCrit(){
+  const b=document.getElementById('sessCritBlock');
+  if(b) b.style.display = (b.style.display==='none'||!b.style.display) ? 'block' : 'none';
 }
 
 function _sessNextPlayerBtn(pid){
