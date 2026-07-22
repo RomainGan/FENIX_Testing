@@ -14,21 +14,21 @@ const TESTS=[
        {s:2,t:'Touche le mur entre 10 et 12 cm'},
        {s:3,t:'Touche le mur au-delà de 12 cm — Bonne mobilité de cheville en dorsiflexion'}
      ]},
-    {id:'t2',num:2,name:'Active Straight Leg Raise',desc:'ASLR — mobilité de la chaîne postérieure',bilateral:true,type:'score',
+    {id:'t2',num:2,name:'Active Straight Leg Raise',desc:'ASLR — mobilité de la chaîne postérieure',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs sur le bas du dos. Impossible de remonter la jambe ou flexion du tronc en même temps que la flexion de la hanche'},
        {s:1,t:'Relève la jambe mais sans amplitude suffisante pour dépasser la ligne perpendiculaire au sol — manque de flexibilité chaîne postérieure'},
        {s:2,t:'Bonne amplitude mais genou du haut ou du bas qui se fléchissent lors de l\'exécution'},
        {s:3,t:'Parfait — exercice réalisé sans difficulté et avec grande amplitude'}
      ]},
-    {id:'t3',num:3,name:'Quadriceps — GMC',desc:'Force quadriceps — gainage musculaire central',bilateral:true,type:'score',
+    {id:'t3',num:3,name:'Quadriceps — GMC',desc:'Force quadriceps — gainage musculaire central',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs et/ou impossibilité de saisir la cheville arrière'},
        {s:1,t:'Possibilité de saisir le pied arrière sans respecter l\'alignement axe du fémur et des lombaires'},
        {s:2,t:'Alignement entre l\'axe du fémur et des lombaires'},
        {s:3,t:'Angle supérieur à la norme'}
      ]},
-    {id:'t4',num:4,name:'Thomas Test Modified',desc:'Souplesse fléchisseurs de hanche',bilateral:true,type:'score',
+    {id:'t4',num:4,name:'Thomas Test Modified',desc:'Souplesse fléchisseurs de hanche',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs et/ou impossibilité de saisir le genou pour le coller à la poitrine'},
        {s:1,t:'Possibilité de saisir le genou sans respecter l\'alignement axe du fémur / horizontale'},
@@ -67,14 +67,14 @@ const TESTS=[
        {s:2,t:'Angle de rotation compris entre 0° et 30°'},
        {s:3,t:'Angle de rotation supérieur à 30°'}
      ]},
-    {id:'t8',num:8,name:'Sleeper Shoulder Test',desc:'Mobilité rotation interne épaule en décubitus',bilateral:true,type:'score',
+    {id:'t8',num:8,name:'Sleeper Shoulder Test',desc:'Mobilité rotation interne épaule en décubitus',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs au niveau de l\'épaule lors de l\'exécution et très peu d\'amplitude'},
        {s:1,t:'Amplitude inférieure à 45° par rapport à l\'axe vertical'},
        {s:2,t:'Bonne amplitude — le bout des doigts touche le sol'},
        {s:3,t:'Grande amplitude — main à plat au sol'}
      ]},
-    {id:'t9',num:9,name:'Chandelier',desc:'Test de mobilité en chandelier — rachis dorsal',bilateral:false,type:'score',
+    {id:'t9',num:9,name:'Chandelier',desc:'Test de mobilité en chandelier — rachis dorsal',bilateral:false,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs et impossible de placer les poignets contre le mur avec un angle de flexion de 90°'},
        {s:1,t:'Impossible de placer les poignets contre le mur dans la position du chandelier'},
@@ -136,7 +136,7 @@ const TESTS=[
        {s:2,t:'Bonne inclinaison (30°–45°) en conservant une bonne stabilité du tronc'},
        {s:3,t:'Grande inclinaison (> 45°) en conservant une bonne stabilité du tronc'}
      ]},
-    {id:'t13',num:13,name:'Rotary Stability',desc:'Stabilité rotatoire du tronc — FMS',bilateral:true,type:'score',
+    {id:'t13',num:13,name:'Rotary Stability',desc:'Stabilité rotatoire du tronc — FMS',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs et/ou impossible de réaliser l\'exercice'},
        {s:1,t:'Échec lors de la réalisation croisée et manque de contrôle moteur'},
@@ -175,14 +175,14 @@ const TESTS=[
      ]}
   ]},
   {id:'fonc',title:'Fonctionnel',badge:'badge-cardi',label:'FONC',sh:'sh-cardi',tests:[
-    {id:'t17',num:17,name:'Deep Squat FMS',desc:'Mobilité et stabilité globale — squat profond',bilateral:false,type:'score',
+    {id:'t17',num:17,name:'Deep Squat FMS',desc:'Mobilité et stabilité globale — squat profond',bilateral:false,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs lors de la réalisation du test — impossible à réaliser'},
        {s:1,t:'Perte d\'équilibre, buste penché en avant et manque de profondeur dans le squat (mobilité et contrôle moteur)'},
        {s:2,t:'Mouvement réussi avec planche sous les talons'},
        {s:3,t:'Mouvement parfait — fémur sous l\'axe des 90°, pieds parallèles, genoux droits, bassin fixé, dos neutre, regard vers l\'avant'}
      ]},
-    {id:'t18',num:18,name:'Trunk Push Up FMS',desc:'Stabilité du tronc en push-up — FMS',bilateral:false,type:'score',
+    {id:'t18',num:18,name:'Trunk Push Up FMS',desc:'Stabilité du tronc en push-up — FMS',bilateral:false,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs et impossible de réaliser l\'exercice sans compensation'},
        {s:1,t:'Mouvement réalisé avec les mains au niveau des clavicules (pompe classique) sans compensation'},
@@ -199,7 +199,7 @@ const TESTS=[
        {s:2,t:'Bonne exécution et temps entre 45″ et 60″. Quelques compensations avec les membres libres'},
        {s:3,t:'Bonne exécution et temps > 60″. Très peu de compensations'}
      ]},
-    {id:'t20',num:20,name:'Drop Valgus Step',desc:'Contrôle valgus en réception — H=20cm, Appel=50cm',bilateral:true,type:'score',
+    {id:'t20',num:20,name:'Drop Valgus Step',desc:'Contrôle valgus en réception — H=20cm, Appel=50cm',bilateral:true,type:'score',hasInfo:true,
      crit:[
        {s:0,t:'Douleurs lors du test et instabilité importante'},
        {s:1,t:'Réception instable avec besoin de sursaut pour se stabiliser. Genou vers l\'intérieur sans douleur'},
