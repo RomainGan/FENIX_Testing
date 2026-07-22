@@ -78,6 +78,7 @@ function renderSession(){
   const el=document.getElementById('mainContent');
   if(!el) return;
   if(_sessStep==='select') el.innerHTML=_sessRenderSelect();
+  else if(_sessStep==='anthropo') el.innerHTML=_sessRenderAnthropo();
   else el.innerHTML=_sessRenderGrid();
 }
 
@@ -272,7 +273,7 @@ function sessStart(){
   });
   save();
 
-  _sessStep='grid';
+  _sessStep='anthropo';
   renderSession();
 }
 
@@ -284,6 +285,149 @@ function _sessGetSess(p){
   return getSess(p, p.sessions.length-1);
 }
 function sessBackToSelect(){ _sessStep='select'; renderSession(); }
+
+// ─── ÉTAPE ANTHROPO : tableau de saisie rapide ───────────
+// Colonnes de plis (ordre de saisie demandé)
+const _SESS_ANTHRO_COLS = [
+  {key:'ta',        label:'Taille',    unit:'cm'},
+  {key:'po',        label:'Poids',     unit:'kg'},
+  {key:'lgMainDom', label:'Lg main',   unit:'cm'},
+  {key:'pliBiceps',   label:'Biceps',      unit:'mm'},
+  {key:'pliTriceps',  label:'Triceps',     unit:'mm'},
+  {key:'pliSousScap', label:'Sous-scap',   unit:'mm'},
+  {key:'pliSupraIli', label:'Supra-ili',   unit:'mm'},
+  {key:'pliPectoral', label:'Pectoral',    unit:'mm'},
+  {key:'pliAxillaire',label:'Axillaire',   unit:'mm'},
+  {key:'pliAbdomen',  label:'Abdomen',     unit:'mm'},
+  {key:'pliCuisse',   label:'Cuisse',      unit:'mm'},
+];
+
+// Calcule le %MG d'un joueur pour une formule donnée depuis sa session-séance
+function _sessCalcMG(p, formuleCle){
+  const f=FORMULES_PLIS[formuleCle]; if(!f) return null;
+  const sess=_sessGetSess(p);
+  const sexe = p.sexe==='F'?'F':'H';
+  const plisKeys = sexe==='F' ? f.plis_F : f.plis_H;
+  let sum=0;
+  for(const k of plisKeys){
+    const v=parseFloat(sess[k]);
+    if(isNaN(v)||v<=0) return null; // pli manquant → pas de calcul
+    sum+=v;
+  }
+  // âge
+  let age=null;
+  if(p.ddn){ const d=new Date(p.ddn); if(!isNaN(d)){ const t=new Date(); age=t.getFullYear()-d.getFullYear()-((t.getMonth()<d.getMonth()||(t.getMonth()===d.getMonth()&&t.getDate()<d.getDate()))?1:0); } }
+  if(age===null) age=20;
+  const r=f.calc(sum, age, sexe);
+  return r && isFinite(r.pct) ? r.pct : null;
+}
+
+function _sessRenderAnthropo(){
+  const parts=players.filter(p=>_sessSelectedIds.includes(p.id)).sort((a,b)=>(a.n||'').localeCompare(b.n||'','fr'));
+
+  // En-têtes de colonnes
+  const headCells=_SESS_ANTHRO_COLS.map(c=>
+    `<th style="padding:8px 6px;font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)">${c.label}<br><span style="opacity:.6;font-size:9px">${c.unit}</span></th>`
+  ).join('');
+
+  // Lignes joueurs
+  const rows=parts.map((p,rowIdx)=>{
+    const sess=_sessGetSess(p);
+    const cells=_SESS_ANTHRO_COLS.map((c,colIdx)=>{
+      const val=sess[c.key]||'';
+      return `<td style="padding:3px;border-bottom:1px solid var(--border)">
+        <input type="text" inputmode="decimal" value="${val}"
+          data-row="${rowIdx}" data-col="${colIdx}"
+          onchange="sessAnthroSet('${p.id}','${c.key}',this.value)"
+          onkeydown="sessAnthroKey(event,${rowIdx},${colIdx})"
+          style="width:56px;background:rgba(0,0,0,.25);border:1px solid var(--border-2);border-radius:6px;
+          padding:7px 4px;color:var(--text);font-size:13px;text-align:center;box-sizing:border-box">
+      </td>`;
+    }).join('');
+    const mgJP7=_sessCalcMG(p,'jp7');
+    const mgDur=_sessCalcMG(p,'durnin4');
+    const mgCell=(v)=> v===null
+      ? '<span style="color:var(--text-3);font-size:12px">—</span>'
+      : `<span style="font-weight:800;font-size:14px;color:var(--cyan)">${v.toFixed(1)}%</span>`;
+    return `<tr>
+      <td style="padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;left:0;background:var(--navy-1);z-index:1">
+        <span style="font-weight:700;font-size:13px;color:var(--text)">${fmtName(p.n,p.pr)}</span></td>
+      ${cells}
+      <td id="mgjp7_${p.id}" style="padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;background:rgba(0,200,230,.05)">${mgCell(mgJP7)}</td>
+      <td id="mgdur_${p.id}" style="padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;background:rgba(0,200,230,.05)">${mgCell(mgDur)}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="max-width:100%;margin:0 auto;padding:8px 4px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+      <span class="section-badge" style="background:rgba(0,200,230,.15);color:var(--cyan);border:1px solid rgba(0,200,230,.3)">MODE SÉANCE</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text)">Données Anthropométriques</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-3);margin-bottom:16px">
+      Saisis les mesures colonne par colonne. Le %MG se calcule quand tu quittes une cellule.
+      <span style="color:var(--text-2)">Entrée = joueur suivant.</span>
+    </div>
+
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--navy-1)">
+      <table style="border-collapse:collapse;width:100%;min-width:900px">
+        <thead>
+          <tr>
+            <th style="padding:8px 10px;font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:1px solid var(--border);position:sticky;left:0;background:var(--navy-2);z-index:2">Joueur</th>
+            ${headCells}
+            <th style="padding:8px 10px;font-size:10px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border);background:rgba(0,200,230,.08)">%MG<br><span style="opacity:.7;font-size:9px">JP7</span></th>
+            <th style="padding:8px 10px;font-size:10px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border);background:rgba(0,200,230,.08)">%MG<br><span style="opacity:.7;font-size:9px">Durnin4</span></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="sessBackToSelect()" style="font-size:13px">← Joueurs</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-cyan" onclick="sessAnthroContinue()" style="font-size:14px">Continuer vers les tests →</button>
+    </div>
+  </div>`;
+}
+
+// Enregistrer une valeur anthropo + recalculer le %MG de la ligne
+function sessAnthroSet(pid, key, val){
+  const p=players.find(x=>x.id===pid); if(!p) return;
+  const sess=_sessGetSess(p);
+  sess[key]=val.trim();
+  // Recalcul %MG (les deux formules)
+  const mgJP7=_sessCalcMG(p,'jp7');
+  const mgDur=_sessCalcMG(p,'durnin4');
+  // Enregistrer le %MG principal (formule de la session ou jp7 par défaut)
+  const primaryF = sess.formulePlis||'jp7';
+  const mgPrimary = _sessCalcMG(p, primaryF);
+  sess.mgPct = mgPrimary!==null ? mgPrimary.toFixed(1) : '';
+  save();
+  // Mise à jour visuelle des cellules %MG sans redessiner le tableau
+  const cJP7=document.getElementById('mgjp7_'+pid);
+  const cDur=document.getElementById('mgdur_'+pid);
+  const fmt=(v)=> v===null?'<span style="color:var(--text-3);font-size:12px">—</span>':`<span style="font-weight:800;font-size:14px;color:var(--cyan)">${v.toFixed(1)}%</span>`;
+  if(cJP7) cJP7.innerHTML=fmt(mgJP7);
+  if(cDur) cDur.innerHTML=fmt(mgDur);
+}
+
+// Navigation clavier : Entrée = même colonne, joueur suivant
+function sessAnthroKey(ev, row, col){
+  if(ev.key==='Enter'){
+    ev.preventDefault();
+    const next=document.querySelector('input[data-row="'+(row+1)+'"][data-col="'+col+'"]');
+    if(next){ next.focus(); next.select(); }
+  }
+}
+
+function sessAnthroContinue(){
+  _sessStep='grid';
+  renderSession();
+}
+function sessBackToAnthropo(){
+  _sessStep='anthropo';
+  renderSession();
+}
 
 // ─── ÉTAPE 2 : GRILLE DE TESTING ──────────────────────────
 function _sessRenderGrid(){
@@ -348,6 +492,7 @@ function _sessRenderGrid(){
     <!-- Barre supérieure -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <button class="btn btn-outline" onclick="sessBackToSelect()" style="font-size:12px">← Joueurs</button>
+      <button class="btn btn-outline" onclick="sessBackToAnthropo()" style="font-size:12px">📏 Anthropo</button>
       <div style="flex:1;min-width:200px">
         <select onchange="sessChangeTest(this.value)" style="width:100%;background:var(--navy-3);
           border:1px solid var(--border-2);border-radius:8px;padding:10px 12px;color:var(--text);
