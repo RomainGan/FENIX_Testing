@@ -84,16 +84,29 @@ const TESTS=[
     {id:'t10',num:10,name:'Shoulder FMS',desc:'Mobilité globale de l\'épaule — FMS',bilateral:true,
      type:'numeric',unit:'cm',hint:'Réf: lg. de la main',
      thr:[{s:0,l:'Douleur'},{s:1,l:'> 1,5× lg main'},{s:2,l:'= lg main'},{s:3,l:'< lg main'}],
-     auto:(v,sess)=>{
+     auto:(v,sess,pl)=>{
        const ecart=parseFloat(v);
        if(isNaN(ecart)||v==='') return null;
        if(ecart<0) return 0;
+       // 1) session courante
        let lgMain=parseFloat(sess&&sess.lgMainDom);
+       // 2) joueur passé en paramètre (Mode Séance) : chercher dans toutes ses sessions
+       if((isNaN(lgMain)||lgMain<=0) && pl && pl.sessions){
+         for(let i=pl.sessions.length-1;i>=0;i--){
+           const lm=parseFloat(pl.sessions[i]&&pl.sessions[i].lgMainDom);
+           if(!isNaN(lm)&&lm>0){ lgMain=lm; break; }
+         }
+       }
+       // 3) fallback : joueur courant (fiche individuelle)
        if(isNaN(lgMain)||lgMain<=0){
          try{
            const _p=(typeof players!=='undefined'&&typeof cPid!=='undefined')?players.find(x=>x.id===cPid):null;
-           const _s=_p?getCurrSess(_p):null;
-           lgMain=parseFloat(_s&&_s.lgMainDom);
+           if(_p&&_p.sessions){
+             for(let i=_p.sessions.length-1;i>=0;i--){
+               const lm=parseFloat(_p.sessions[i]&&_p.sessions[i].lgMainDom);
+               if(!isNaN(lm)&&lm>0){ lgMain=lm; break; }
+             }
+           }
          }catch(e){}
        }
        if(isNaN(lgMain)||lgMain<=0) return null;
