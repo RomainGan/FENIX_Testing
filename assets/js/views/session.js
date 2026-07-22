@@ -250,17 +250,31 @@ function sessStart(){
   if(_sessSelectedIds.length===0) return;
   if(!_sessTestId) _sessTestId=_sessAllTests()[0]?.id;
 
-  // Créer une NOUVELLE session datée du jour pour chaque joueur sélectionné
   const today=new Date().toISOString().split('T')[0];
-  _sessSessionIdx={}; // mémorise l'index de la session-séance de chaque joueur
+  // Identifiant de séance : une seule séance par jour tant qu'on ne repart pas de zéro.
+  // Réutilise la session-séance déjà créée aujourd'hui si elle existe (évite les doublons vides).
+  if(!_sessSessionIdx) _sessSessionIdx={};
   _sessSelectedIds.forEach(pid=>{
     const p=players.find(x=>x.id===pid);
     if(!p) return;
     if(!p.sessions) p.sessions=[];
+
+    // 1) Session déjà mémorisée pour cette séance ? → on la garde
+    if(_sessSessionIdx[pid]!==undefined && p.sessions[_sessSessionIdx[pid]] && p.sessions[_sessSessionIdx[pid]]._sessRun){
+      return;
+    }
+    // 2) Sinon, chercher une session-séance déjà créée aujourd'hui (marquée _sessRun)
+    const existingIdx = p.sessions.findIndex(s=>s._sessRun && s.dt===today);
+    if(existingIdx>=0){
+      _sessSessionIdx[pid]=existingIdx;
+      return;
+    }
+    // 3) Sinon créer une nouvelle session-séance
     const last=p.sessions.length? p.sessions[p.sessions.length-1] : {};
     const sess={
       sid:Date.now().toString()+'_'+pid,
       dt:today,
+      _sessRun:true, // marqueur : session créée par le Mode Séance
       ta:last.ta||'', po:last.po||'',
       pliBiceps:'',pliTriceps:'',pliSousScap:'',pliSupraIli:'',
       pliPectoral:'',pliAxillaire:'',pliAbdomen:'',pliCuisse:'',
