@@ -9,6 +9,27 @@ let _sessStep = 'select';    // 'select' | 'grid'
 let _sessSide = 'g';         // pour tests bilatéraux : côté en cours de saisie
 let _sessSessionIdx = {};    // {pid: index de la session-séance créée au démarrage}
 let _sessManageGroups = false; // panneau de gestion des groupes ouvert ?
+
+// ─── MODE CHRONO (tests de gainage/équilibre) ────────────
+let _chronoActive = false;      // vue chrono ouverte ?
+let _chronoTestId = null;       // test chronométré en cours
+let _chronoSide = 'g';          // côté pour tests bilatéraux
+let _chronoRunning = false;     // chrono en marche ?
+let _chronoStart = 0;           // timestamp de départ
+let _chronoElapsed = 0;         // temps écoulé (ms) au moment du reset/pause
+let _chronoInterval = null;     // handle setInterval
+let _chronoPlayers = [];        // joueurs cochés pour la vague
+let _chronoStops = {};          // {pid: secondes figées}
+
+// Barème temps (s) → score, commun aux 4 tests chronométrés
+function _chronoScore(sec){
+  const s=parseFloat(sec);
+  if(isNaN(s)) return null;
+  if(s<30) return 0;
+  if(s<45) return 1;
+  if(s<=60) return 2;
+  return 3;
+}
 let _sessEditGroupId = null;   // groupe en cours d'édition
 
 // ─── GROUPES DE SÉANCE (stockage séparé : ftph_groups) ────
@@ -79,6 +100,7 @@ function renderSession(){
   if(!el) return;
   if(_sessStep==='select') el.innerHTML=_sessRenderSelect();
   else if(_sessStep==='anthropo') el.innerHTML=_sessRenderAnthropo();
+  else if(_chronoActive) el.innerHTML=_chronoRender();
   else el.innerHTML=_sessRenderGrid();
 }
 
@@ -517,10 +539,13 @@ function _sessRenderGrid(){
     </div>
 
     <!-- Infos test -->
-    <div style="background:var(--navy-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--cyan)">
-        Test ${test.num} — ${test.name}</div>
-      <div style="font-size:12px;color:var(--text-3);margin-top:2px">${test.desc||''}${test.unit?' · Unité : '+test.unit:''}${test.bilateral?' · Bilatéral (G/D)':''}</div>
+    <div style="background:var(--navy-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--cyan)">
+          Test ${test.num} — ${test.name}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:2px">${test.desc||''}${test.unit?' · Unité : '+test.unit:''}${test.bilateral?' · Bilatéral (G/D)':''}</div>
+      </div>
+      ${test.chrono?`<button class="btn btn-cyan" onclick="chronoOpen('${test.id}')" style="font-size:13px">⏱ Mode chrono</button>`:''}
     </div>
 
     <!-- Grille -->
@@ -751,4 +776,225 @@ function sessSetNote(pid, val){
   if(!sess.d) sess.d={};
   sess.d[_sessTestId+'_nt']=val;
   save();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ─── MODE CHRONO : logique complète ────────────────────────
+// ═══════════════════════════════════════════════════════════
+
+function chronoOpen(tid){
+  _chronoTestId=tid;
+  _chronoActive=true;
+  _chronoSide='g';
+  _chronoReset();
+  // Par défaut, cocher tous les joueurs de la séance
+  _chronoPlayers=_sessSelectedIds.slice();
+  _chronoStops={};
+  renderSession();
+}
+
+function chronoClose(){
+  _chronoStopTimer();
+  _chronoActive=false;
+  _chronoRunning=false;
+  renderSession();
+}
+
+function _chronoStopTimer(){
+  if(_chronoInterval){ clearInterval(_chronoInterval); _chronoInterval=null; }
+}
+
+function _chronoReset(){
+  _chronoStopTimer();
+  _chronoRunning=false;
+  _chronoElapsed=0;
+  _chronoStart=0;
+}
+
+// Temps courant en secondes (1 décimale)
+function _chronoNow(){
+  let ms=_chronoElapsed;
+  if(_chronoRunning) ms += (Date.now()-_chronoStart);
+  return ms/1000;
+}
+
+function chronoStartPause(){
+  if(_chronoRunning){
+    // Pause
+    _chronoElapsed += (Date.now()-_chronoStart);
+    _chronoRunning=false;
+    _chronoStopTimer();
+  } else {
+    // Démarrer
+    _chronoStart=Date.now();
+    _chronoRunning=true;
+    _chronoInterval=setInterval(_chronoTick, 100);
+  }
+  _chronoUpdateBtnLabel();
+}
+
+function chronoResetAll(){
+  if(!confirm('Réinitialiser le chrono et effacer les temps de cette vague ?')) return;
+  _chronoReset();
+  _chronoStops={};
+  renderSession();
+}
+
+// Mise à jour de l'affichage du temps sans re-render complet
+function _chronoTick(){
+  const el=document.getElementById('chronoDisplay');
+  if(el) el.textContent=_chronoFmt(_chronoNow());
+}
+
+function _chronoFmt(sec){
+  const s=Math.floor(sec);
+  const d=Math.floor((sec-s)*10);
+  const m=Math.floor(s/60);
+  const ss=s%60;
+  return (m>0? (m+':'+String(ss).padStart(2,'0')) : ss)+'.'+d+'\u2033';
+}
+
+function _chronoUpdateBtnLabel(){
+  const b=document.getElementById('chronoMainBtn');
+  if(b) b.textContent=_chronoRunning?'⏸ Pause':'▶ Démarrer';
+}
+
+// STOP sur un joueur : fige son temps + calcule le score
+function chronoStopPlayer(pid){
+  const sec=_chronoNow();
+  _chronoStops[pid]=parseFloat(sec.toFixed(1));
+  _chronoApplyScore(pid, _chronoStops[pid]);
+  renderSession();
+}
+
+// Applique le temps + score auto dans la session-séance du joueur
+function _chronoApplyScore(pid, sec){
+  const p=players.find(x=>x.id===pid); if(!p) return;
+  const sess=_sessGetSess(p);
+  if(!sess.d) sess.d={};
+  const test=_sessGetTest(_chronoTestId);
+  const side = test.bilateral ? _chronoSide : '';
+  const rawKey=_chronoTestId+(side?'_'+side:'')+'_raw';
+  const scoreKey=_chronoTestId+(side?'_'+side:'');
+  sess.d[rawKey]=String(sec);
+  const sc=_chronoScore(sec);
+  if(sc!==null) sess.d[scoreKey]=sc;
+  save();
+}
+
+// Correction manuelle du temps d'un joueur
+function chronoEditTime(pid, val){
+  const sec=parseFloat(String(val).replace(',','.'));
+  if(isNaN(sec)) return;
+  _chronoStops[pid]=sec;
+  _chronoApplyScore(pid, sec);
+  // Mettre à jour le score affiché sans re-render (préserve le focus)
+  const badge=document.getElementById('chronoScore_'+pid);
+  if(badge){
+    const sc=_chronoScore(sec);
+    const c=_sessScoreColor(sc);
+    badge.textContent=sc;
+    badge.style.background=c;
+  }
+}
+
+function chronoSetSide(side){
+  _chronoSide=side;
+  renderSession();
+}
+
+function chronoTogglePlayer(pid){
+  const i=_chronoPlayers.indexOf(pid);
+  if(i>=0) _chronoPlayers.splice(i,1); else _chronoPlayers.push(pid);
+  renderSession();
+}
+
+function _chronoRender(){
+  const test=_sessGetTest(_chronoTestId);
+  const allParts=players.filter(p=>_sessSelectedIds.includes(p.id)).sort((a,b)=>(a.n||'').localeCompare(b.n||'','fr'));
+
+  // Sélecteur de côté (si bilatéral)
+  const sideSelector = test.bilateral ? `
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <span style="font-size:12px;color:var(--text-3);align-self:center;margin-right:4px">Côté :</span>
+      <button onclick="chronoSetSide('g')" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${_chronoSide==='g'?'var(--cyan)':'var(--border-2)'};background:${_chronoSide==='g'?'var(--cyan)':'transparent'};color:${_chronoSide==='g'?'#0a1628':'var(--text)'};font-weight:700;cursor:pointer">◄ GAUCHE</button>
+      <button onclick="chronoSetSide('d')" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${_chronoSide==='d'?'var(--cyan)':'var(--border-2)'};background:${_chronoSide==='d'?'var(--cyan)':'transparent'};color:${_chronoSide==='d'?'#0a1628':'var(--text)'};font-weight:700;cursor:pointer">DROITE ►</button>
+    </div>` : '';
+
+  // Lignes joueurs
+  const rows=allParts.map(p=>{
+    const inWave=_chronoPlayers.includes(p.id);
+    const stopped=_chronoStops[p.id]!==undefined;
+    const sec=_chronoStops[p.id];
+    const sc=stopped?_chronoScore(sec):null;
+    const scColor=sc!==null?_sessScoreColor(sc):'var(--text-3)';
+
+    if(!inWave){
+      // Joueur non sélectionné pour cette vague (grisé, cliquable pour ajouter)
+      return `<div onclick="chronoTogglePlayer('${p.id}')" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;opacity:.5">
+        <div style="width:18px;height:18px;border-radius:5px;border:2px solid var(--border-2);flex-shrink:0"></div>
+        <span style="flex:1;font-size:14px;color:var(--text-2)">${fmtName(p.n,p.pr)}</span>
+        <span style="font-size:11px;color:var(--text-3)">Non inclus</span>
+      </div>`;
+    }
+
+    // Joueur dans la vague
+    let right='';
+    if(stopped){
+      right=`<div style="display:flex;align-items:center;gap:8px">
+        <input type="text" inputmode="decimal" value="${sec}" onchange="chronoEditTime('${p.id}',this.value)"
+          style="width:64px;background:rgba(0,0,0,.3);border:1px solid var(--border-2);border-radius:6px;padding:7px 6px;color:var(--text);font-size:14px;text-align:center">
+        <span style="font-size:11px;color:var(--text-3)">s</span>
+        <span id="chronoScore_${p.id}" style="width:30px;height:30px;border-radius:7px;background:${scColor};color:#0a1628;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${sc}</span>
+        <button onclick="chronoRelaunch('${p.id}')" title="Re-chronométrer" style="background:none;border:1px solid var(--border-2);border-radius:6px;padding:6px 8px;color:var(--text-3);cursor:pointer;font-size:12px">↻</button>
+      </div>`;
+    } else {
+      right=`<button onclick="chronoStopPlayer('${p.id}')" style="background:var(--red);border:none;border-radius:8px;padding:12px 24px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;letter-spacing:1px">STOP</button>`;
+    }
+
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid ${stopped?'var(--border)':'var(--cyan)'};background:${stopped?'var(--navy-2)':'rgba(0,200,230,.05)'}">
+      <div onclick="chronoTogglePlayer('${p.id}')" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--cyan);background:var(--cyan);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:800;font-size:11px">✓</div>
+      <span style="flex:1;font-size:14px;font-weight:600;color:var(--text)">${fmtName(p.n,p.pr)}</span>
+      ${right}
+    </div>`;
+  }).join('');
+
+  const nbWave=_chronoPlayers.length;
+  const sideLabel = test.bilateral ? (_chronoSide==='g'?' — Gauche':' — Droite') : '';
+
+  return `<div style="max-width:800px;margin:0 auto;padding:8px 4px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="chronoClose()" style="font-size:12px">← Retour grille</button>
+      <div style="flex:1"></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:8px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--cyan)">⏱ ${test.name}${sideLabel}</div>
+      <div style="font-size:12px;color:var(--text-3)">Barème : &lt;30″ = 0 · 30–45″ = 1 · 45–60″ = 2 · &gt;60″ = 3</div>
+    </div>
+
+    ${sideSelector}
+
+    <!-- Chrono global -->
+    <div style="background:var(--navy-1);border:2px solid var(--cyan);border-radius:16px;padding:20px;margin-bottom:18px;text-align:center">
+      <div id="chronoDisplay" style="font-family:'Bebas Neue',monospace;font-size:56px;font-weight:400;color:var(--text);letter-spacing:2px;line-height:1">${_chronoFmt(_chronoNow())}</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+        <button id="chronoMainBtn" class="btn btn-cyan" onclick="chronoStartPause()" style="font-size:15px;min-width:130px">${_chronoRunning?'⏸ Pause':'▶ Démarrer'}</button>
+        <button class="btn btn-outline" onclick="chronoResetAll()" style="font-size:14px">↻ Reset</button>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
+      ${nbWave} joueur(s) dans cette vague. Décoche ceux qui ne passent pas maintenant. Tape STOP quand un joueur lâche.
+    </div>
+
+    <!-- Liste joueurs -->
+    <div style="display:flex;flex-direction:column;gap:8px">${rows}</div>
+  </div>`;
+}
+
+// Re-chronométrer un joueur (efface son temps figé)
+function chronoRelaunch(pid){
+  delete _chronoStops[pid];
+  renderSession();
 }
