@@ -426,7 +426,7 @@ function sessOpenEntry(pid){
     return [0,1,2,3].map(v=>{
       const sel=(currentVal!==undefined&&currentVal!==null&&currentVal!==''&&parseInt(currentVal)===v);
       const c=_sessScoreColor(v);
-      return `<button onclick="sessSetScore('${pid}','${sideKey}',${v})" style="flex:1;padding:14px 0;
+      return `<button data-score="${v}" onclick="sessSetScore('${pid}','${sideKey}',${v})" style="flex:1;padding:14px 0;
         border-radius:10px;border:2px solid ${sel?c:'var(--border-2)'};
         background:${sel?c:'transparent'};color:${sel?'#0a1628':'var(--text)'};
         font-weight:800;font-size:20px;cursor:pointer;transition:all .1s">${v}</button>`;
@@ -455,19 +455,19 @@ function sessOpenEntry(pid){
       <div style="margin-bottom:16px">
         <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;letter-spacing:1px">◄ GAUCHE</div>
         ${rawField('g')}
-        <div style="display:flex;gap:8px">${scoreButtons('g',sg)}</div>
+        <div id="sessScoreBtns_g" style="display:flex;gap:8px">${scoreButtons('g',sg)}</div>
       </div>
       <div style="margin-bottom:16px">
         <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;letter-spacing:1px">DROITE ►</div>
         ${rawField('d')}
-        <div style="display:flex;gap:8px">${scoreButtons('d',sd)}</div>
+        <div id="sessScoreBtns_d" style="display:flex;gap:8px">${scoreButtons('d',sd)}</div>
       </div>`;
   } else {
     const s=d[test.id];
     bodyHtml=`
       <div style="margin-bottom:16px">
         ${rawField('')}
-        <div style="display:flex;gap:8px">${scoreButtons('',s)}</div>
+        <div id="sessScoreBtns_x" style="display:flex;gap:8px">${scoreButtons('',s)}</div>
       </div>`;
   }
 
@@ -538,16 +538,29 @@ function sessSetRaw(pid, side, rawVal){
   sess.d[rawKey]=rawVal;
   const test=_sessGetTest(_sessTestId);
   if(test&&test.auto){
-    const autoS=test.auto(rawVal, sess);
+    const autoS=test.auto(rawVal, sess, p);
     if(autoS!==null){
       sess.d[scoreKey]=autoS;
-      // Rafraîchir les boutons de score dans la popup
-      save();
-      sessOpenEntry(pid);
-      return;
+      // Mettre à jour visuellement les boutons de score SANS redessiner (préserve le focus)
+      _sessUpdateScoreButtons(pid, side, autoS);
     }
   }
   save();
+}
+
+// Met à jour la sélection visuelle des boutons 0/1/2/3 sans reconstruire la popup
+function _sessUpdateScoreButtons(pid, side, selVal){
+  const container=document.getElementById('sessScoreBtns_'+(side||'x'));
+  if(!container) return;
+  const btns=container.querySelectorAll('button');
+  btns.forEach(btn=>{
+    const v=parseInt(btn.getAttribute('data-score'));
+    const c=_sessScoreColor(v);
+    const sel=(v===selVal);
+    btn.style.border='2px solid '+(sel?c:'var(--border-2)');
+    btn.style.background=sel?c:'transparent';
+    btn.style.color=sel?'#0a1628':'var(--text)';
+  });
 }
 
 function sessSetNote(pid, val){
