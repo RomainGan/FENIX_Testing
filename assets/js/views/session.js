@@ -840,6 +840,17 @@ function chronoResetAll(){
   renderSession();
 }
 
+// Valide la vague (garde les scores) et prépare une nouvelle vague propre
+function chronoNewWave(){
+  // Remet le chrono à zéro SANS toucher aux scores déjà enregistrés
+  _chronoReset();
+  // Décocher les joueurs déjà testés dans cette vague ; garder les non-testés
+  const stoppedIds = Object.keys(_chronoStops);
+  _chronoPlayers = _chronoPlayers.filter(id => !stoppedIds.includes(id));
+  _chronoStops = {};
+  renderSession();
+}
+
 // Mise à jour de l'affichage du temps sans re-render complet
 function _chronoTick(){
   const el=document.getElementById('chronoDisplay');
@@ -864,6 +875,13 @@ function chronoStopPlayer(pid){
   const sec=_chronoNow();
   _chronoStops[pid]=parseFloat(sec.toFixed(1));
   _chronoApplyScore(pid, _chronoStops[pid]);
+  // Si tous les joueurs cochés de la vague sont stoppés → arrêter le chrono global
+  const tousStoppes = _chronoPlayers.length>0 && _chronoPlayers.every(id=>_chronoStops[id]!==undefined);
+  if(tousStoppes && _chronoRunning){
+    _chronoElapsed += (Date.now()-_chronoStart);
+    _chronoRunning=false;
+    _chronoStopTimer();
+  }
   renderSession();
 }
 
@@ -978,8 +996,9 @@ function _chronoRender(){
     <!-- Chrono global -->
     <div style="background:var(--navy-1);border:2px solid var(--cyan);border-radius:16px;padding:20px;margin-bottom:18px;text-align:center">
       <div id="chronoDisplay" style="font-family:'Bebas Neue',monospace;font-size:56px;font-weight:400;color:var(--text);letter-spacing:2px;line-height:1">${_chronoFmt(_chronoNow())}</div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
         <button id="chronoMainBtn" class="btn btn-cyan" onclick="chronoStartPause()" style="font-size:15px;min-width:130px">${_chronoRunning?'⏸ Pause':'▶ Démarrer'}</button>
+        <button class="btn btn-outline" onclick="chronoNewWave()" style="font-size:14px;border-color:var(--green);color:var(--green)">✓ Valider &amp; nouvelle vague</button>
         <button class="btn btn-outline" onclick="chronoResetAll()" style="font-size:14px">↻ Reset</button>
       </div>
     </div>
