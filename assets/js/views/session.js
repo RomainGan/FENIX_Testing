@@ -939,6 +939,29 @@ function _chronoRender(){
       <button onclick="chronoSetSide('d')" style="flex:1;padding:10px;border-radius:8px;border:2px solid ${_chronoSide==='d'?'var(--cyan)':'var(--border-2)'};background:${_chronoSide==='d'?'var(--cyan)':'transparent'};color:${_chronoSide==='d'?'#0a1628':'var(--text)'};font-weight:700;cursor:pointer">DROITE ►</button>
     </div>` : '';
 
+  // Lit la valeur déjà enregistrée d'un joueur pour un côté donné
+  function _recorded(p, side){
+    const sess=_sessGetSess(p);
+    const d=sess.d||{};
+    const rawKey=_chronoTestId+(side?'_'+side:'')+'_raw';
+    const scoreKey=_chronoTestId+(side?'_'+side:'');
+    const raw=d[rawKey];
+    const sc=d[scoreKey];
+    if(raw===undefined||raw===''||raw===null) return null;
+    return {sec:raw, sc:(sc!==undefined&&sc!==null&&sc!=='')?parseInt(sc):null};
+  }
+
+  // Petit badge « temps + score » pour l'historique
+  function _recBadge(rec, label){
+    if(!rec) return `<span style="font-size:11px;color:var(--text-3);min-width:52px;text-align:center">${label?label+' —':'—'}</span>`;
+    const col=rec.sc!==null?_sessScoreColor(rec.sc):'var(--text-3)';
+    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-2)">
+      ${label?`<span style="font-size:10px;color:var(--text-3);font-weight:700">${label}</span>`:''}
+      <span style="font-variant-numeric:tabular-nums">${rec.sec}s</span>
+      <span style="width:20px;height:20px;border-radius:5px;background:${col};color:#0a1628;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">${rec.sc!==null?rec.sc:'–'}</span>
+    </span>`;
+  }
+
   // Lignes joueurs
   const rows=allParts.map(p=>{
     const inWave=_chronoPlayers.includes(p.id);
@@ -947,12 +970,23 @@ function _chronoRender(){
     const sc=stopped?_chronoScore(sec):null;
     const scColor=sc!==null?_sessScoreColor(sc):'var(--text-3)';
 
+    // Historique enregistré (toujours affiché)
+    let histHtml='';
+    if(test.bilateral){
+      const recG=_recorded(p,'g'), recD=_recorded(p,'d');
+      histHtml=`<div style="display:flex;gap:10px;align-items:center">
+        ${_recBadge(recG,'G')}${_recBadge(recD,'D')}
+      </div>`;
+    } else {
+      histHtml=_recBadge(_recorded(p,''));
+    }
+
     if(!inWave){
-      // Joueur non sélectionné pour cette vague (grisé, cliquable pour ajouter)
-      return `<div onclick="chronoTogglePlayer('${p.id}')" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;opacity:.5">
-        <div style="width:18px;height:18px;border-radius:5px;border:2px solid var(--border-2);flex-shrink:0"></div>
-        <span style="flex:1;font-size:14px;color:var(--text-2)">${fmtName(p.n,p.pr)}</span>
-        <span style="font-size:11px;color:var(--text-3)">Non inclus</span>
+      // Joueur non sélectionné pour cette vague : grisé, mais on garde ses résultats visibles
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:transparent">
+        <div onclick="chronoTogglePlayer('${p.id}')" style="cursor:pointer;width:18px;height:18px;border-radius:5px;border:2px solid var(--border-2);flex-shrink:0"></div>
+        <span onclick="chronoTogglePlayer('${p.id}')" style="cursor:pointer;flex:1;font-size:14px;color:var(--text-2);opacity:.65">${fmtName(p.n,p.pr)}</span>
+        ${histHtml}
       </div>`;
     }
 
@@ -970,9 +1004,18 @@ function _chronoRender(){
       right=`<button onclick="chronoStopPlayer('${p.id}')" style="background:var(--red);border:none;border-radius:8px;padding:12px 24px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;letter-spacing:1px">STOP</button>`;
     }
 
+    // Pour un bilatéral, on montre aussi l'autre côté déjà fait (repère utile)
+    let otherSideHtml='';
+    if(test.bilateral){
+      const other=_chronoSide==='g'?'d':'g';
+      const recOther=_recorded(p,other);
+      if(recOther) otherSideHtml=`<span style="margin-right:6px">${_recBadge(recOther, other==='g'?'G':'D')}</span>`;
+    }
+
     return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid ${stopped?'var(--border)':'var(--cyan)'};background:${stopped?'var(--navy-2)':'rgba(0,200,230,.05)'}">
       <div onclick="chronoTogglePlayer('${p.id}')" style="width:18px;height:18px;border-radius:5px;border:2px solid var(--cyan);background:var(--cyan);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#0a1628;font-weight:800;font-size:11px">✓</div>
       <span style="flex:1;font-size:14px;font-weight:600;color:var(--text)">${fmtName(p.n,p.pr)}</span>
+      ${otherSideHtml}
       ${right}
     </div>`;
   }).join('');
@@ -1005,6 +1048,7 @@ function _chronoRender(){
 
     <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">
       ${nbWave} joueur(s) dans cette vague. Décoche ceux qui ne passent pas maintenant. Tape STOP quand un joueur lâche.
+      ${test.bilateral?'<br><span style="color:var(--text-2)">Les résultats déjà enregistrés restent affichés : <b>G</b> = gauche, <b>D</b> = droite.</span>':'<br><span style="color:var(--text-2)">Les résultats déjà enregistrés restent affichés à droite de chaque joueur.</span>'}
     </div>
 
     <!-- Liste joueurs -->
